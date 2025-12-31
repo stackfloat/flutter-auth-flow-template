@@ -9,6 +9,11 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
     on<EmailChanged>(_onEmailChanged);
     on<PasswordChanged>(_onPasswordChanged);
     on<SigninSubmitted>(_onSigninSubmitted);
+    on<RevealPassword>(_onRevealPassword);
+  }
+
+  void _onRevealPassword(RevealPassword event, Emitter<SigninState> emit) {
+    emit(state.copyWith(revealPassword: event.revealPassword));
   }
 
   void _onEmailChanged(EmailChanged event, Emitter<SigninState> emit) {

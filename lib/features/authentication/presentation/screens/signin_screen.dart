@@ -63,6 +63,8 @@ class LoginScreen extends StatelessWidget {
                           TextFieldWidget(
                             keyboardType: TextInputType.visiblePassword,
                             isPassword: true,
+                            revealPassword: state.revealPassword,
+                            onRevealPassword: () => context.read<SigninBloc>().add(RevealPassword(!state.revealPassword)),
                             onChanged: (value) => context.read<SigninBloc>().add(PasswordChanged(value)),
                             errorMessage: state.formSubmitted ? state.errors['password'] : null,
                           ),
@@ -74,9 +76,7 @@ class LoginScreen extends StatelessWidget {
                             child: ElevatedButtonWidget(
                               buttonLabel: 'Sign In',
                               onPressEvent: () {
-                                // context.read<SigninBloc>().add(SigninSubmitted());
-                              // Crash the app to test Firebase Crashlytics
-                                throw StateError("Test crash for Firebase Crashlytics.");
+                                context.read<SigninBloc>().add(SigninSubmitted());
                               },
                             ),
                           ),

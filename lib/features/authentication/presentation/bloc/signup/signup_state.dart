@@ -6,6 +6,8 @@ class SignupState {
   final String password;
   final String confirmPassword;
   final bool formSubmitted;
+  final bool revealPassword;
+  final bool revealConfirmPassword;
 
   final Map<String, String?> errors;
 
@@ -19,6 +21,8 @@ class SignupState {
     this.formSubmitted = false,
     this.errors = const {},
     this.status = SignupStatus.initial,
+    this.revealPassword = false,
+    this.revealConfirmPassword = false,
   });
 
   bool get isValid =>
@@ -42,6 +46,8 @@ class SignupState {
     bool? formSubmitted,
     Map<String, String?>? errors,
     SignupStatus? status,
+    bool? revealPassword,
+    bool? revealConfirmPassword,
   }) {
     return SignupState(
       name: name ?? this.name,
@@ -51,6 +57,8 @@ class SignupState {
       formSubmitted: formSubmitted ?? this.formSubmitted,
       errors: errors ?? this.errors,
       status: status ?? this.status,
+      revealPassword: revealPassword ?? this.revealPassword,
+      revealConfirmPassword: revealConfirmPassword ?? this.revealConfirmPassword,
     );
   }
 }

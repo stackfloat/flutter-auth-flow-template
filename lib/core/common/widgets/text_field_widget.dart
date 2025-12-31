@@ -23,7 +23,7 @@ class TextFieldWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      obscureText: isPassword ? true : false,
+      obscureText: isPassword && !revealPassword,
       keyboardType: keyboardType,
       onChanged: onChanged,
       decoration: InputDecoration(

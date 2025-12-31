@@ -14,3 +14,9 @@ final class PasswordChanged extends SigninEvent {
 }
 
 final class SigninSubmitted extends SigninEvent {}
+
+
+final class RevealPassword extends SigninEvent {
+  final bool revealPassword;
+  RevealPassword(this.revealPassword);
+}

@@ -19,9 +19,7 @@ class SignupScreen extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return BlocConsumer<SignupBloc, SignupState>(
-              listener: (context, state) {
-                
-              },
+              listener: (context, state) {},
               builder: (context, state) {
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -54,9 +52,13 @@ class SignupScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           TextFieldWidget(
                             keyboardType: TextInputType.name,
-                            onChanged: (value) => context.read<SignupBloc>().add(NameChanged(value)),
-                            errorMessage: state.formSubmitted ? state.errors['name'] : null,
-                            ),
+                            onChanged: (value) => context
+                                .read<SignupBloc>()
+                                .add(NameChanged(value)),
+                            errorMessage: state.formSubmitted
+                                ? state.errors['name']
+                                : null,
+                          ),
                           const SizedBox(height: 20),
 
                           // Email field
@@ -64,8 +66,12 @@ class SignupScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           TextFieldWidget(
                             keyboardType: TextInputType.emailAddress,
-                            onChanged: (value) => context.read<SignupBloc>().add(EmailChanged(value)),
-                            errorMessage: state.formSubmitted ? state.errors['email'] : null,
+                            onChanged: (value) => context
+                                .read<SignupBloc>()
+                                .add(EmailChanged(value)),
+                            errorMessage: state.formSubmitted
+                                ? state.errors['email']
+                                : null,
                           ),
                           const SizedBox(height: 20),
 
@@ -75,8 +81,16 @@ class SignupScreen extends StatelessWidget {
                           TextFieldWidget(
                             keyboardType: TextInputType.visiblePassword,
                             isPassword: true,
-                            onChanged: (value) => context.read<SignupBloc>().add(PasswordChanged(value)),
-                            errorMessage: state.formSubmitted ? state.errors['password'] : null,
+                            onRevealPassword: () => context
+                                .read<SignupBloc>()
+                                .add(RevealPassword(!state.revealPassword)),
+                            revealPassword: state.revealPassword,
+                            onChanged: (value) => context
+                                .read<SignupBloc>()
+                                .add(PasswordChanged(value)),
+                            errorMessage: state.formSubmitted
+                                ? state.errors['password']
+                                : null,
                           ),
                           const SizedBox(height: 32),
 
@@ -85,9 +99,20 @@ class SignupScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           TextFieldWidget(
                             keyboardType: TextInputType.visiblePassword,
+                            revealPassword: state.revealConfirmPassword,
+                            onRevealPassword: () =>
+                                context.read<SignupBloc>().add(
+                                  RevealConfirmPassword(
+                                    !state.revealConfirmPassword,
+                                  ),
+                                ),
                             isPassword: true,
-                            onChanged: (value) => context.read<SignupBloc>().add(ConfirmPasswordChanged(value)),
-                            errorMessage: state.formSubmitted ? state.errors['confirmPassword'] : null,
+                            onChanged: (value) => context
+                                .read<SignupBloc>()
+                                .add(ConfirmPasswordChanged(value)),
+                            errorMessage: state.formSubmitted
+                                ? state.errors['confirmPassword']
+                                : null,
                           ),
                           const SizedBox(height: 32),
 
@@ -97,7 +122,9 @@ class SignupScreen extends StatelessWidget {
                             child: ElevatedButtonWidget(
                               buttonLabel: 'Sign Up',
                               onPressEvent: () {
-                                context.read<SignupBloc>().add(SignupSubmitted());
+                                context.read<SignupBloc>().add(
+                                  SignupSubmitted(),
+                                );
                               },
                             ),
                           ),
@@ -112,9 +139,10 @@ class SignupScreen extends StatelessWidget {
                                 TextSpan(
                                   style: textTheme.bodyMedium,
                                   children: [
-                                    TextSpan(text: "Already have an account? ", style: TextStyle(
-                                      color: Colors.black,
-                                    )),
+                                    TextSpan(
+                                      text: "Already have an account? ",
+                                      style: TextStyle(color: Colors.black),
+                                    ),
                                     TextSpan(
                                       text: "Sign In",
                                       style: textTheme.bodyMedium?.copyWith(

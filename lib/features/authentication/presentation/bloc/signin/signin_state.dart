@@ -9,6 +9,7 @@ class SigninState {
   final Map<String, String?> errors;
   final SigninStatus status;
   final bool formSubmitted;
+  final bool revealPassword;
 
   const SigninState({
     this.email = '',
@@ -16,6 +17,7 @@ class SigninState {
     this.errors = const {},
     this.status = SigninStatus.initial,
     this.formSubmitted = false,
+    this.revealPassword = false,
   });
 
   // Helper getters for easy access to specific errors
@@ -33,6 +35,7 @@ class SigninState {
     Map<String, String?>? errors,
     SigninStatus? status,
     bool? formSubmitted,
+    bool? revealPassword,
   }) {
     return SigninState(
       email: email ?? this.email,
@@ -40,6 +43,7 @@ class SigninState {
       errors: errors ?? this.errors,
       status: status ?? this.status,
       formSubmitted: formSubmitted ?? this.formSubmitted,
+      revealPassword: revealPassword ?? this.revealPassword,
     );
   }
 }

@@ -21,3 +21,14 @@ class ConfirmPasswordChanged extends SignupEvent {
 }
 
 class SignupSubmitted extends SignupEvent {}
+
+
+class RevealPassword extends SignupEvent {
+  final bool revealPassword;
+  RevealPassword(this.revealPassword);
+}
+
+class RevealConfirmPassword extends SignupEvent {
+  final bool revealConfirmPassword;
+  RevealConfirmPassword(this.revealConfirmPassword);
+}

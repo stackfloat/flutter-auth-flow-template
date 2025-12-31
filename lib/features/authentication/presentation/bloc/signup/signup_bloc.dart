@@ -9,6 +9,16 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     on<PasswordChanged>(_onPasswordChanged);
     on<ConfirmPasswordChanged>(_onConfirmPasswordChanged);
     on<SignupSubmitted>(_onSignupSubmitted);
+    on<RevealPassword>(_onRevealPassword);
+    on<RevealConfirmPassword>(_onRevealConfirmPassword);
+  }
+
+  void _onRevealPassword(RevealPassword event, Emitter<SignupState> emit) {
+    emit(state.copyWith(revealPassword: event.revealPassword));
+  }
+
+  void _onRevealConfirmPassword(RevealConfirmPassword event, Emitter<SignupState> emit) {
+    emit(state.copyWith(revealConfirmPassword: event.revealConfirmPassword));
   }
 
   void _onNameChanged(NameChanged event, Emitter<SignupState> emit) {
