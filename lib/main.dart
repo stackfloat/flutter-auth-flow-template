@@ -24,15 +24,10 @@ void main() {
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      if (!kReleaseMode) {
-        await FirebaseCrashlytics.instance.sendUnsentReports();
-      }
-
       Bloc.observer = AppBlocObserver();
 
-      final crashlyticsEnabled = dotenv.env['ENABLE_CRASHLYTICS'] == 'true';
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-        crashlyticsEnabled,
+        kReleaseMode    ,
       );
 
       FlutterError.onError = (details) {
