@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_widget.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/text_field_widget.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -73,7 +74,9 @@ class LoginScreen extends StatelessWidget {
                             child: ElevatedButtonWidget(
                               buttonLabel: 'Sign In',
                               onPressEvent: () {
-                                context.read<SigninBloc>().add(SigninSubmitted());
+                                // context.read<SigninBloc>().add(SigninSubmitted());
+                              // Crash the app to test Firebase Crashlytics
+                                throw StateError("Test crash for Firebase Crashlytics.");
                               },
                             ),
                           ),
@@ -82,20 +85,23 @@ class LoginScreen extends StatelessWidget {
                           const Spacer(), // ✅ Now works with IntrinsicHeight
                           // Sign up link at bottom
                           Center(
-                            child: Text.rich(
-                              TextSpan(
-                                style: textTheme.bodyMedium,
-                                children: [
-                                  const TextSpan(
-                                    text: "Don't have an account? ",
-                                  ),
-                                  TextSpan(
-                                    text: "Sign Up",
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                            child: GestureDetector(
+                              onTap: () => context.pushNamed('signup'),
+                              child: Text.rich(
+                                TextSpan(
+                                  style: textTheme.bodyMedium,
+                                  children: [
+                                    TextSpan(text: "Don't have an account? ", style: TextStyle(
+                                      color: Colors.black,
+                                    )),
+                                    TextSpan(
+                                      text: "Sign Up",
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),

@@ -5,6 +5,7 @@ import 'package:furniture_ecommerce_app/core/common/widgets/text_field_widget.da
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_event.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_state.dart';
+import 'package:go_router/go_router.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -105,20 +106,23 @@ class SignupScreen extends StatelessWidget {
                           const Spacer(), // ✅ Now works with IntrinsicHeight
                           // Sign up link at bottom
                           Center(
-                            child: Text.rich(
-                              TextSpan(
-                                style: textTheme.bodyMedium,
-                                children: [
-                                  const TextSpan(
-                                    text: "Already have an account? ",
-                                  ),
-                                  TextSpan(
-                                    text: "Sign In",
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                            child: GestureDetector(
+                              onTap: () => context.pushNamed('signin'),
+                              child: Text.rich(
+                                TextSpan(
+                                  style: textTheme.bodyMedium,
+                                  children: [
+                                    TextSpan(text: "Already have an account? ", style: TextStyle(
+                                      color: Colors.black,
+                                    )),
+                                    TextSpan(
+                                      text: "Sign In",
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),

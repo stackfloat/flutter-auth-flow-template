@@ -7,11 +7,11 @@ import 'package:furniture_ecommerce_app/features/home/presentation/screens/home_
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/signin',
   routes: [
     GoRoute(
-      path: '/login',
-      name: 'login',
+      path: '/signin',
+      name: 'signin',
       builder: (context, state) => BlocProvider(
         create: (context) => SigninBloc(),
         child: const LoginScreen(),
