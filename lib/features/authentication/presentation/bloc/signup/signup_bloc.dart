@@ -103,6 +103,8 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     final isValid = state.errors.values.every((error) => error == null);
 
     if (isValid) {
+      emit(state.copyWith(status: SignupStatus.loading));
+
       final result = await signupUseCase(
         SignupParams(
           name: state.name,
@@ -111,11 +113,14 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
         ),
       );
 
+      print('result');
+      print(result);
+
       result.fold(
         (failure) {
           emit(state.copyWith(status: SignupStatus.failure));
         },
-        (success) {
+        (user) {
           emit(state.copyWith(status: SignupStatus.success));
         },
       );

@@ -1,6 +1,6 @@
 part of 'signin_bloc.dart';
 
-enum SigninStatus { initial, success, failure }
+enum SigninStatus { initial, loading, success, failure }
 
 class SigninState {
   final String email;

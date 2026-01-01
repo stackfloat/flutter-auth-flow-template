@@ -1,15 +1,15 @@
 import 'package:furniture_ecommerce_app/core/domain/usecases/usecase.dart';
 import 'package:furniture_ecommerce_app/core/utils/typedef.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/repositories/auth_repository.dart';
 
 class LogoutUseCase implements UseCase<void, NoParams> {
-  // final AuthRepository repository;
+  final AuthRepository repository;
   
-  // LogoutUseCase(this.repository);
+  LogoutUseCase(this.repository);
   
   @override
   ResultFuture<void> call(NoParams params) async {
-    // TODO: Implement logout logic
-    throw UnimplementedError();
+    return repository.logout();
   }
 }
 

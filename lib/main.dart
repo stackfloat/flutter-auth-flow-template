@@ -31,11 +31,13 @@ void main() {
       );
 
       FlutterError.onError = (details) {
+        print('FlutterError.onError');
         if (!kReleaseMode) FlutterError.dumpErrorToConsole(details);
         FirebaseCrashlytics.instance.recordFlutterFatalError(details);
       };
 
       PlatformDispatcher.instance.onError = (error, stack) {
+        print('PlatformDispatcher.instance.onError');
         if (!kReleaseMode) {
           FlutterError.dumpErrorToConsole(
             FlutterErrorDetails(exception: error, stack: stack),
@@ -60,6 +62,7 @@ void main() {
       runApp(const MainApp());
     },
     (error, stack) {
+      print('runZonedGuarded');
       if (!kReleaseMode) {
         FlutterError.dumpErrorToConsole(
           FlutterErrorDetails(exception: error, stack: stack),

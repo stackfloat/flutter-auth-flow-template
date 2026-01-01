@@ -3,6 +3,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:furniture_ecommerce_app/core/services/logging/app_logger.dart';
 import 'package:furniture_ecommerce_app/core/services/network/dio_client.dart';
 import 'package:furniture_ecommerce_app/core/services/storage/secure_storage_service.dart';
+import 'package:furniture_ecommerce_app/features/authentication/data/datasources/auth_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/authentication/data/repositories/auth_respository_impl.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/logout_usecase.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signin_usecase.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -76,60 +82,40 @@ Future<void> initDependencies() async {
   // Features - Authentication
   // ---------------------------------------------------------------------------
 
-  // ✅ Blocs
+  // Data Sources
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
+      sl<AuthRemoteDataSource>(),
+      sl<SecureStorageService>(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<SigninUseCase>(
+    () => SigninUseCase(sl<AuthRepository>()),
+  );
+  
+  sl.registerLazySingleton<SignupUseCase>(
+    () => SignupUseCase(sl<AuthRepository>()),
+  );
+  
+  sl.registerLazySingleton<LogoutUseCase>(
+    () => LogoutUseCase(sl<AuthRepository>()),
+  );
+
+  // Blocs
   sl.registerFactory<SigninBloc>(
-    () => SigninBloc(),
-    // TODO: Inject use case when implemented
-    // () => SigninBloc(signinUseCase: sl<SigninUseCase>()),
+    () => SigninBloc(sl<SigninUseCase>()),
   );
 
   sl.registerFactory<SignupBloc>(
-    () => SignupBloc(),
-    // TODO: Inject use case when implemented
-    // () => SignupBloc(signupUseCase: sl<SignupUseCase>()),
+    () => SignupBloc(sl<SignupUseCase>()),
   );
-
-  // ⏳ Use Cases (TODO: Uncomment when repository is implemented)
-  // sl.registerLazySingleton<SigninUseCase>(
-  //   () => SigninUseCase(sl<AuthRepository>()),
-  // );
-  
-  // sl.registerLazySingleton<SignupUseCase>(
-  //   () => SignupUseCase(sl<AuthRepository>()),
-  // );
-  
-  // sl.registerLazySingleton<LogoutUseCase>(
-  //   () => LogoutUseCase(sl<AuthRepository>()),
-  // );
-
-  // ⏳ Repository (TODO: Uncomment when data layer is implemented)
-  // sl.registerLazySingleton<AuthRepository>(
-  //   () => AuthRepositoryImpl(
-  //     remoteDataSource: sl<AuthRemoteDataSource>(),
-  //     localDataSource: sl<AuthLocalDataSource>(),
-  //     networkInfo: sl<NetworkInfo>(),
-  //   ),
-  // );
-
-  // ⏳ Data Sources (TODO: Implement and uncomment)
-  // sl.registerLazySingleton<AuthRemoteDataSource>(
-  //   () => AuthRemoteDataSourceImpl(
-  //     client: sl<DioClient>(),
-  //   ),
-  // );
-  
-  // sl.registerLazySingleton<AuthLocalDataSource>(
-  //   () => AuthLocalDataSourceImpl(
-  //     secureStorage: sl<SecureStorageService>(),
-  //   ),
-  // );
-
-  // ⏳ Network (TODO: Add if needed)
-  // sl.registerLazySingleton<NetworkInfo>(
-  //   () => NetworkInfoImpl(sl<InternetConnectionChecker>()),
-  // );
-  
-  // sl.registerLazySingleton<http.Client>(() => http.Client());
 
   // ---------------------------------------------------------------------------
   // Features - Other Features (Add as needed)

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furniture_ecommerce_app/core/services/dependency_injection/injection_container.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/screens/signin_screen.dart';
@@ -13,7 +14,7 @@ final router = GoRouter(
       path: '/signin',
       name: 'signin',
       builder: (context, state) => BlocProvider(
-        create: (context) => SigninBloc(),
+        create: (context) => sl<SigninBloc>(),
         child: const LoginScreen(),
       ),
     ),
@@ -21,7 +22,7 @@ final router = GoRouter(
       path: '/signup',
       name: 'signup',
       builder: (context, state) => BlocProvider(
-        create: (context) => SignupBloc(),
+        create: (context) => sl<SignupBloc>(),
         child: const SignupScreen(),
       ),
     ),

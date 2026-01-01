@@ -19,7 +19,11 @@ class SignupScreen extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return BlocConsumer<SignupBloc, SignupState>(
-              listener: (context, state) {},
+              listener: (context, state) {
+              if (state.status == SignupStatus.success) {
+                context.go('/');
+              }
+              },
               builder: (context, state) {
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(16),

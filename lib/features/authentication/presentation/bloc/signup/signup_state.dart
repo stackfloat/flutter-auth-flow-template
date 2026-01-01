@@ -1,4 +1,4 @@
-enum SignupStatus { initial, success, failure }
+enum SignupStatus { initial, loading, success, failure }
 
 class SignupState {
   final String name;

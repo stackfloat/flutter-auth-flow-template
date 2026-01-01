@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signin_usecase.dart';
 import 'package:meta/meta.dart';
 
 part 'signin_event.dart';
 part 'signin_state.dart';
 
 class SigninBloc extends Bloc<SigninEvent, SigninState> {
-  SigninBloc() : super(const SigninState()) {
+  final SigninUseCase signinUseCase;
+
+  SigninBloc(this.signinUseCase) : super(const SigninState()) {
     on<EmailChanged>(_onEmailChanged);
     on<PasswordChanged>(_onPasswordChanged);
     on<SigninSubmitted>(_onSigninSubmitted);
@@ -36,7 +39,7 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
     ));
   }
 
-  void _onSigninSubmitted(SigninSubmitted event, Emitter<SigninState> emit) {
+  void _onSigninSubmitted(SigninSubmitted event, Emitter<SigninState> emit) async {
     // Perform all validations on submit
     emit(state.copyWith(
       formSubmitted: true,
@@ -51,7 +54,23 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
     final isValid = state.errors.values.every((error) => error == null);
 
     if (isValid) {
-      emit(state.copyWith(status: SigninStatus.success));
+      emit(state.copyWith(status: SigninStatus.loading));
+
+      final result = await signinUseCase(
+        SigninParams(
+          email: state.email,
+          password: state.password,
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          emit(state.copyWith(status: SigninStatus.failure));
+        },
+        (user) {
+          emit(state.copyWith(status: SigninStatus.success));
+        },
+      );
     } else {
       emit(state.copyWith(status: SigninStatus.failure));
     }
