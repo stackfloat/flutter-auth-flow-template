@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/entities/user.dart';
+import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_errors.dart';
 
 enum SignupStatus { initial, loading, success, failure }
 
@@ -11,7 +12,7 @@ class SignupState extends Equatable {
   final bool formSubmitted;
   final bool revealPassword;
   final bool revealConfirmPassword;
-  final Map<String, String?> errors;
+  final SignupErrors errors;
 
   final SignupStatus status;
   final User? user;
@@ -22,7 +23,7 @@ class SignupState extends Equatable {
     this.password = '',
     this.confirmPassword = '',
     this.formSubmitted = false,
-    this.errors = const {},
+    this.errors = SignupErrors.empty,
     this.status = SignupStatus.initial,
     this.revealPassword = false,
     this.revealConfirmPassword = false,
@@ -33,17 +34,17 @@ class SignupState extends Equatable {
   List<Object?> get props => [name, email, password, confirmPassword, formSubmitted, errors, status, revealPassword, revealConfirmPassword, user];
 
   bool get isValid =>
-      errors.isEmpty &&
+      errors.hasErrors &&
       name.isNotEmpty &&
       email.isNotEmpty &&
       password.isNotEmpty &&
       confirmPassword.isNotEmpty;
 
   // Helper getters for individual errors
-  String? get nameError => errors['name'];
-  String? get emailError => errors['email'];
-  String? get passwordError => errors['password'];
-  String? get confirmPasswordError => errors['confirmPassword'];
+  String? get nameError => errors.name;
+  String? get emailError => errors.email;
+  String? get passwordError => errors.password;
+  String? get confirmPasswordError => errors.confirmPassword;
 
   SignupState copyWith({
     String? name,
@@ -51,7 +52,7 @@ class SignupState extends Equatable {
     String? password,
     String? confirmPassword,
     bool? formSubmitted,
-    Map<String, String?>? errors,
+    SignupErrors? errors,
     SignupStatus? status,
     bool? revealPassword,
     bool? revealConfirmPassword,

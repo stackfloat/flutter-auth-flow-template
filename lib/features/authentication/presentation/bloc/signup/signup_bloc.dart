@@ -1,5 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/errors/validation_exception.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_params.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/value_objects/confirmed_password.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/value_objects/email.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/value_objects/name.dart';
+import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_errors.dart';
 import 'signup_event.dart';
 import 'signup_state.dart';
 
@@ -28,10 +34,13 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
   }
 
   void _onNameChanged(NameChanged event, Emitter<SignupState> emit) {
+
     emit(
       state.copyWith(
         name: event.name,
-        errors: {...state.errors, ..._validateName(event.name)},
+        errors: state.formSubmitted
+            ? state.errors.copyWith(name: _nameUxError(event.name))
+            : state.errors,
       ),
     );
   }
@@ -40,7 +49,9 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     emit(
       state.copyWith(
         email: event.email,
-        errors: {...state.errors, ..._validateEmail(event.email)},
+        errors: state.formSubmitted
+            ? state.errors.copyWith(email: _emailUxError(event.email))
+            : state.errors,
       ),
     );
   }
@@ -49,21 +60,17 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     emit(
       state.copyWith(
         password: event.password,
-        errors: {...state.errors, ..._validatePassword(event.password)},
+        errors: state.formSubmitted
+            ? state.errors.copyWith(
+                password: _passwordUxError(event.password),
+                confirmPassword: _confirmPasswordUxError(
+                  event.password,
+                  state.confirmPassword,
+                ),
+              )
+            : state.errors,
       ),
     );
-
-    // Re-validate confirm password if it's not empty
-    if (state.confirmPassword.isNotEmpty) {
-      emit(
-        state.copyWith(
-          errors: {
-            ...state.errors,
-            ..._validateConfirmPassword(state.confirmPassword),
-          },
-        ),
-      );
-    }
   }
 
   void _onConfirmPasswordChanged(
@@ -73,105 +80,145 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     emit(
       state.copyWith(
         confirmPassword: event.confirmPassword,
-        errors: {
-          ...state.errors,
-          ..._validateConfirmPassword(event.confirmPassword),
-        },
+        errors: state.formSubmitted
+            ? state.errors.copyWith(
+                confirmPassword: _confirmPasswordUxError(
+                  state.password,
+                  event.confirmPassword,
+                ),
+              )
+            : state.errors,
       ),
     );
   }
 
-  void _onSignupSubmitted(
+  Future<void> _onSignupSubmitted(
     SignupSubmitted event,
     Emitter<SignupState> emit,
   ) async {
-    // Perform all validations on submit
-    final validationErrors = {
-      ...state.errors,
-      ..._validateName(state.name),
-      ..._validateEmail(state.email),
-      ..._validatePassword(state.password),
-      ..._validateConfirmPassword(state.confirmPassword),
-    };
+
+    // 1️⃣ Run UX validation for ALL fields (aggregate)
+    final uxErrors = SignupErrors(
+      name: _nameUxError(state.name),
+      email: _emailUxError(state.email),
+      password: _passwordUxError(state.password),
+      confirmPassword: _confirmPasswordUxError(
+        state.password,
+        state.confirmPassword,
+      ),
+    );
 
     emit(
       state.copyWith(
         formSubmitted: true,
-        errors: validationErrors,
+        errors: uxErrors,
       ),
     );
 
-    // Check if form is valid (all errors are null)
-    final isValid = validationErrors.values.every((error) => error == null);
+    // 2️⃣ If UX errors exist → stop (better UX)
+    if (uxErrors.hasErrors) return;
 
-    if (isValid) {
-      emit(state.copyWith(status: SignupStatus.loading));
 
-      final result = await signupUseCase(
-        SignupParams(
-          name: state.name,
-          email: state.email,
+    try {
+      // 2️⃣ HARD validation (domain boundary)
+      final params = SignupParams(
+        name: Name(state.name),
+        email: Email(state.email),
+        password: ConfirmedPassword(
           password: state.password,
+          confirmation: state.confirmPassword,
         ),
       );
 
+      // 3️⃣ Domain is valid → proceed
+      emit(state.copyWith(status: SignupStatus.loading));
+
+      final result = await signupUseCase(params);
+
       result.fold(
         (failure) {
-          emit(state.copyWith(status: SignupStatus.failure));
+          emit(
+            state.copyWith(
+              status: SignupStatus.failure,
+              // optional: store failure for toast/snackbar
+            ),
+          );
         },
-        (user) {        
+        (user) {
           emit(state.copyWith(status: SignupStatus.success, user: user));
         },
+      );
+    } on ValidationException catch (e) {
+      // 4️⃣ Domain → UI translation
+      emit(
+        state.copyWith(
+          status: SignupStatus.initial,
+          errors: _mapDomainExceptionToUiErrors(e),
+        ),
       );
     }
   }
 
-  // Validation methods
-  Map<String, String?> _validateName(String name) {
-    name = name.trim();
-
-    if (name.isEmpty) {
-      return {'name': 'Name is required'};
-    } else if (name.length < 3) {
-      return {'name': 'Name must be at least 3 characters'};
-    }
-
-    return {'name': null};
-  }
-
-  Map<String, String?> _validateEmail(String email) {
-    email = email.trim();
-
-    if (email.isEmpty) {
-      return {'email': 'Email is required'};
-    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-      return {'email': 'Invalid email'};
-    }
-
-    return {'email': null};
-  }
-
-  Map<String, String?> _validatePassword(String password) {
-    password = password.trim();
-
+  String? _passwordUxError(String password) {
     if (password.isEmpty) {
-      return {'password': 'Password is required'};
-    } else if (password.length < 6) {
-      return {'password': 'Password must be at least 6 characters'};
+      return 'Password is required';
     }
-
-    return {'password': null};
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    return null;
   }
 
-  Map<String, String?> _validateConfirmPassword(String confirmPassword) {
-    confirmPassword = confirmPassword.trim();
-
+  String? _confirmPasswordUxError(String password, String confirmPassword) {
     if (confirmPassword.isEmpty) {
-      return {'confirmPassword': 'Confirm password is required'};
-    } else if (confirmPassword != state.password) {
-      return {'confirmPassword': 'Passwords do not match'};
+      return 'Confirm password is required';
+    }
+    if (password != confirmPassword) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+
+  String? _nameUxError(String name) {
+    if (name.isEmpty) {
+      return 'Name is required';
+    }
+    if (name.length < 3) {
+      return 'Name must be at least 3 characters';
+    }
+    return null;
+  }
+
+  String? _emailUxError(String email) {
+    if (email.isEmpty) {
+      return 'Email is required';
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      return 'Invalid email';
+    }
+    return null;
+  }
+
+  SignupErrors _mapDomainExceptionToUiErrors(ValidationException exception) {
+
+    if(exception is InvalidNameException) {
+      return const SignupErrors(name: 'Name must be at least 3 characters');
     }
 
-    return {'confirmPassword': null};
+    if (exception is InvalidEmailException) {
+      return const SignupErrors(email: 'Invalid email address');
+    }
+
+    if (exception is WeakPasswordException) {
+      return const SignupErrors(
+        password: 'Password must be at least 8 characters',
+      );
+    }
+
+    if (exception is PasswordMismatchException) {
+      return const SignupErrors(confirmPassword: 'Passwords do not match');
+    }
+
+    return SignupErrors.empty;
   }
 }

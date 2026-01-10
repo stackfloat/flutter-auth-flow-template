@@ -72,7 +72,7 @@ class SignupScreen extends StatelessWidget {
                                 .read<SignupBloc>()
                                 .add(NameChanged(value)),
                             errorMessage: state.formSubmitted
-                                ? state.errors['name']
+                                ? state.errors.name
                                 : null,
                           ),
                           const SizedBox(height: 20),
@@ -86,7 +86,7 @@ class SignupScreen extends StatelessWidget {
                                 .read<SignupBloc>()
                                 .add(EmailChanged(value)),
                             errorMessage: state.formSubmitted
-                                ? state.errors['email']
+                                ? state.errors.email
                                 : null,
                           ),
                           const SizedBox(height: 20),
@@ -105,7 +105,7 @@ class SignupScreen extends StatelessWidget {
                                 .read<SignupBloc>()
                                 .add(PasswordChanged(value)),
                             errorMessage: state.formSubmitted
-                                ? state.errors['password']
+                                ? state.errors.password
                                 : null,
                           ),
                           const SizedBox(height: 32),
@@ -127,7 +127,7 @@ class SignupScreen extends StatelessWidget {
                                 .read<SignupBloc>()
                                 .add(ConfirmPasswordChanged(value)),
                             errorMessage: state.formSubmitted
-                                ? state.errors['confirmPassword']
+                                ? state.errors.confirmPassword
                                 : null,
                           ),
                           const SizedBox(height: 32),
