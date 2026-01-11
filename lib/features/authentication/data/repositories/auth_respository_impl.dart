@@ -6,6 +6,8 @@ import 'package:furniture_ecommerce_app/core/services/storage/secure_storage_ser
 import 'package:furniture_ecommerce_app/core/utils/typedef.dart';
 import 'package:furniture_ecommerce_app/features/authentication/data/datasources/auth_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/entities/user.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/email_already_exists_failure.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/username_already_exists_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -30,13 +32,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(userModel.toEntity());
     } on ServerException catch (e) {
-      return Left(
-        ApiFailure(
-          message: e.message ?? 'An error occurred',
-          statusCode: e.statusCode ?? 500,
-          errors: e.errors,
-        ),
-      );
+      // 1️⃣ Handle validation-style API errors (422 / 409)
+      if (e.statusCode == 422) {
+        final errors = e.errors ?? {};
+
+        // Email already exists
+        if (errors.containsKey('email')) {
+          return Left(EmailAlreadyExistsFailure());
+        }
+
+        // Username already exists (if applicable)
+        if (errors.containsKey('username')) {
+          return Left(UsernameAlreadyExistsFailure());
+        }
+      }
+
+      // 2️⃣ Fallback to generic API failure
+      return Left(ApiFailure(message: e.message ?? 'Server error occurred'));
+      
     } catch (e) {
       return Left(
         ApiFailure(

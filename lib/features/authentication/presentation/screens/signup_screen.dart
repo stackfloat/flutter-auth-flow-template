@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_widget.dart';
+import 'package:furniture_ecommerce_app/core/common/widgets/error_text_widget.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/text_field_widget.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_event.dart';
@@ -131,6 +132,9 @@ class SignupScreen extends StatelessWidget {
                                 : null,
                           ),
                           const SizedBox(height: 32),
+
+                          if (state.serverError != null)
+                            ErrorTextWidget(errorMessage: state.serverError!),
 
                           // Login button
                           SizedBox(

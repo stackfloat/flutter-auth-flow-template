@@ -13,6 +13,7 @@ class SignupState extends Equatable {
   final bool revealPassword;
   final bool revealConfirmPassword;
   final SignupErrors errors;
+  final String? serverError;
 
   final SignupStatus status;
   final User? user;
@@ -28,6 +29,7 @@ class SignupState extends Equatable {
     this.revealPassword = false,
     this.revealConfirmPassword = false,
     this.user,
+    this.serverError,
   });
 
   @override
@@ -57,6 +59,7 @@ class SignupState extends Equatable {
     bool? revealPassword,
     bool? revealConfirmPassword,
     User? user,
+    Object? serverError = _unset,
   }) {
     return SignupState(
       name: name ?? this.name,
@@ -69,6 +72,11 @@ class SignupState extends Equatable {
       revealPassword: revealPassword ?? this.revealPassword,
       revealConfirmPassword: revealConfirmPassword ?? this.revealConfirmPassword,
       user: user ?? this.user,
+      serverError: serverError == _unset
+          ? this.serverError
+          : serverError as String?,
     );
   }
+
+  static const _unset = Object();
 }

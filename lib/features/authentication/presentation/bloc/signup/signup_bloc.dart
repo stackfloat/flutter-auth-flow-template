@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furniture_ecommerce_app/core/errors/failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/errors/validation_exception.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/auth_failure.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/email_already_exists_failure.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/username_already_exists_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_params.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/value_objects/confirmed_password.dart';
@@ -34,7 +38,6 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
   }
 
   void _onNameChanged(NameChanged event, Emitter<SignupState> emit) {
-
     emit(
       state.copyWith(
         name: event.name,
@@ -96,7 +99,6 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     SignupSubmitted event,
     Emitter<SignupState> emit,
   ) async {
-
     // 1️⃣ Run UX validation for ALL fields (aggregate)
     final uxErrors = SignupErrors(
       name: _nameUxError(state.name),
@@ -108,16 +110,10 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       ),
     );
 
-    emit(
-      state.copyWith(
-        formSubmitted: true,
-        errors: uxErrors,
-      ),
-    );
+    emit(state.copyWith(formSubmitted: true, errors: uxErrors));
 
     // 2️⃣ If UX errors exist → stop (better UX)
     if (uxErrors.hasErrors) return;
-
 
     try {
       // 2️⃣ HARD validation (domain boundary)
@@ -137,12 +133,22 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
 
       result.fold(
         (failure) {
-          emit(
-            state.copyWith(
-              status: SignupStatus.failure,
-              // optional: store failure for toast/snackbar
-            ),
-          );
+          if (failure is AuthFailure) {
+            emit(
+              state.copyWith(
+                status: SignupStatus.initial,
+                errors: _mapFailureToUiErrors(failure),
+                serverError: null,
+              ),
+            );
+          } else {
+            emit(
+              state.copyWith(
+                status: SignupStatus.initial,
+                serverError: _mapFailureToGlobalMessage(failure),
+              ),
+            );
+          }
         },
         (user) {
           emit(state.copyWith(status: SignupStatus.success, user: user));
@@ -200,8 +206,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
   }
 
   SignupErrors _mapDomainExceptionToUiErrors(ValidationException exception) {
-
-    if(exception is InvalidNameException) {
+    if (exception is InvalidNameException) {
       return const SignupErrors(name: 'Name must be at least 3 characters');
     }
 
@@ -220,5 +225,33 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     }
 
     return SignupErrors.empty;
+  }
+
+  SignupErrors _mapFailureToUiErrors(Failure failure) {
+    if (failure is EmailAlreadyExistsFailure) {
+      return SignupErrors(email: 'Email already exists');
+    }
+
+    if (failure is UsernameAlreadyExistsFailure) {
+      return SignupErrors(name: 'Username already exists');
+    }
+
+    return SignupErrors.empty;
+  }
+
+  String _mapFailureToGlobalMessage(Failure failure) {
+
+
+    print(failure);
+
+    if (failure is NetworkFailure) {
+      return 'Network error. Please check your connection.';
+    }
+
+    if (failure is ServerFailure) {
+      return 'Something went wrong. Please try again later.';
+    }
+
+    return 'Unexpected error occurred1.';
   }
 }
