@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_widget.dart';
+import 'package:furniture_ecommerce_app/core/common/widgets/error_text_widget.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/text_field_widget.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_event.dart';
@@ -67,7 +68,7 @@ class LoginScreen extends StatelessWidget {
                           TextFieldWidget(
                             keyboardType: TextInputType.emailAddress,
                             onChanged: (value) => context.read<SigninBloc>().add(EmailChanged(value)),
-                            errorMessage: state.formSubmitted ? state.errors['email'] : null,
+                            errorMessage:state.errors.email,
                           ),
                           const SizedBox(height: 20),
 
@@ -80,9 +81,15 @@ class LoginScreen extends StatelessWidget {
                             revealPassword: state.revealPassword,
                             onRevealPassword: () => context.read<SigninBloc>().add(RevealPassword(!state.revealPassword)),
                             onChanged: (value) => context.read<SigninBloc>().add(PasswordChanged(value)),
-                            errorMessage: state.formSubmitted ? state.errors['password'] : null,
+                            errorMessage: state.errors.password,
                           ),
                           const SizedBox(height: 32),
+
+                          if (state.serverError != null)
+                            ErrorTextWidget(errorMessage: state.serverError!),
+
+                          if (state.authError != null)
+                            ErrorTextWidget(errorMessage: state.authError!),
 
                           // Login button
                           SizedBox(
