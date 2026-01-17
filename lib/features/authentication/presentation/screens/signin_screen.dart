@@ -28,111 +28,185 @@ class LoginScreen extends StatelessWidget {
                   LoggedIn(state.user!),
                 );
               },
-              child: BlocBuilder<SigninBloc, SigninState>(
-                builder: (context, state) {
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - 32,
-                      ),
-                      child: IntrinsicHeight(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 40),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - 32,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 40),
 
-                          // Title
-                          Text(
-                            "Let's Sign You In.",
-                            style: textTheme.headlineLarge,
-                          ),
-                          const SizedBox(height: 8),
+                        // Title
+                        Text(
+                          "Let's Sign You In.",
+                          style: textTheme.headlineLarge,
+                        ),
+                        const SizedBox(height: 8),
 
-                          // Subtitle
-                          Text(
-                            "To Continue, first Verify that it's You.",
-                            style: textTheme.bodyLarge,
-                          ),
-                          const SizedBox(height: 32),
+                        // Subtitle
+                        Text(
+                          "To Continue, first Verify that it's You.",
+                          style: textTheme.bodyLarge,
+                        ),
+                        const SizedBox(height: 32),
 
-                          // Email field
-                          Text("Email", style: textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextFieldWidget(
-                            keyboardType: TextInputType.emailAddress,
-                            onChanged: (value) => context.read<SigninBloc>().add(EmailChanged(value)),
-                            errorMessage:state.errors.email,
-                          ),
-                          const SizedBox(height: 20),
+                        const _SigninEmailField(),
+                        const SizedBox(height: 20),
 
-                          // Password field
-                          Text("Password", style: textTheme.labelLarge),
-                          const SizedBox(height: 8),
-                          TextFieldWidget(
-                            keyboardType: TextInputType.visiblePassword,
-                            isPassword: true,
-                            revealPassword: state.revealPassword,
-                            onRevealPassword: () => context.read<SigninBloc>().add(RevealPassword(!state.revealPassword)),
-                            onChanged: (value) => context.read<SigninBloc>().add(PasswordChanged(value)),
-                            errorMessage: state.errors.password,
-                          ),
-                          const SizedBox(height: 32),
+                        const _SigninPasswordField(),
+                        const SizedBox(height: 32),
 
-                          if (state.serverError != null)
-                            ErrorTextWidget(errorMessage: state.serverError!),
+                        const _SigninGlobalErrors(),
 
-                          if (state.authError != null)
-                            ErrorTextWidget(errorMessage: state.authError!),
+                        // Login button
+                        const SizedBox(
+                          width: double.infinity,
+                          child: _SigninSubmitButton(),
+                        ),
 
-                          // Login button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButtonWidget(
-                              buttonLabel: 'Sign In',
-                              isLoading: state.status == SigninStatus.loading,
-                              onPressEvent: () {
-                                context.read<SigninBloc>().add(SigninSubmitted());
-                              },
-                            ),
-                          ),
-
-                          const SizedBox(height: 22),
-                          const Spacer(), // ✅ Now works with IntrinsicHeight
-                          // Sign up link at bottom
-                          Center(
-                            child: GestureDetector(
-                              onTap: () => context.pushNamed('signup'),
-                              child: Text.rich(
-                                TextSpan(
-                                  style: textTheme.bodyMedium,
-                                  children: [
-                                    TextSpan(text: "Don't have an account? ", style: TextStyle(
-                                      color: Colors.black,
-                                    )),
-                                    TextSpan(
-                                      text: "Sign Up",
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                        const SizedBox(height: 22),
+                        const Spacer(), // Now works with IntrinsicHeight
+                        // Sign up link at bottom
+                        Center(
+                          child: GestureDetector(
+                            onTap: () => context.pushNamed('signup'),
+                            child: Text.rich(
+                              TextSpan(
+                                style: textTheme.bodyMedium,
+                                children: [
+                                  const TextSpan(
+                                    text: "Don't have an account? ",
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  TextSpan(
+                                    text: "Sign Up",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          ],
                         ),
-                      ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             );
           },
         ),
       ),
+    );
+  }
+}
+
+class _SigninEmailField extends StatelessWidget {
+  const _SigninEmailField();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final error = context.select(
+      (SigninBloc bloc) => bloc.state.errors.email,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Email", style: textTheme.labelLarge),
+        const SizedBox(height: 8),
+        TextFieldWidget(
+          keyboardType: TextInputType.emailAddress,
+          onChanged: (value) =>
+              context.read<SigninBloc>().add(EmailChanged(value)),
+          errorMessage: error,
+        ),
+      ],
+    );
+  }
+}
+
+class _SigninPasswordField extends StatelessWidget {
+  const _SigninPasswordField();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final state = context.select((SigninBloc bloc) => (
+          bloc.state.errors.password,
+          bloc.state.revealPassword,
+        ));
+    final passwordError = state.$1;
+    final revealPassword = state.$2;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Password", style: textTheme.labelLarge),
+        const SizedBox(height: 8),
+        TextFieldWidget(
+          keyboardType: TextInputType.visiblePassword,
+          isPassword: true,
+          revealPassword: revealPassword,
+          onRevealPassword: () => context
+              .read<SigninBloc>()
+              .add(RevealPassword(!revealPassword)),
+          onChanged: (value) =>
+              context.read<SigninBloc>().add(PasswordChanged(value)),
+          errorMessage: passwordError,
+        ),
+      ],
+    );
+  }
+}
+
+class _SigninGlobalErrors extends StatelessWidget {
+  const _SigninGlobalErrors();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.select((SigninBloc bloc) => (
+          bloc.state.serverError,
+          bloc.state.authError,
+        ));
+    final serverError = state.$1;
+    final authError = state.$2;
+
+    if (serverError == null && authError == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        if (serverError != null) ErrorTextWidget(errorMessage: serverError),
+        if (authError != null) ErrorTextWidget(errorMessage: authError),
+      ],
+    );
+  }
+}
+
+class _SigninSubmitButton extends StatelessWidget {
+  const _SigninSubmitButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoading = context.select(
+      (SigninBloc bloc) => bloc.state.status == SigninStatus.loading,
+    );
+
+    return ElevatedButtonWidget(
+      buttonLabel: 'Sign In',
+      isLoading: isLoading,
+      onPressEvent: () {
+        context.read<SigninBloc>().add(const SigninSubmitted());
+      },
     );
   }
 }

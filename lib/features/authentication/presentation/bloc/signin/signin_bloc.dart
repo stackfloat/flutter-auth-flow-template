@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/errors/failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/entities/user.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/errors/validation_exception.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/auth_validation_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/account_disabled_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/invalid_credentials_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signin_usecase.dart';
@@ -112,6 +113,15 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
                 status: SigninStatus.failure,
               ),
             );
+          } else if (failure is AuthValidationFailure) {
+            emit(
+              state.copyWith(
+                errors: _mapValidationFailureToUiErrors(failure),
+                authError: null,
+                serverError: null,
+                status: SigninStatus.failure,
+              ),
+            );
           } else {
             emit(
               state.copyWith(
@@ -168,6 +178,22 @@ class SigninBloc extends Bloc<SigninEvent, SigninState> {
     }
 
     return SigninErrors.empty;
+  }
+
+  SigninErrors _mapValidationFailureToUiErrors(
+    AuthValidationFailure failure,
+  ) {
+    String? firstError(List<String>? errors) {
+      if (errors == null || errors.isEmpty) return null;
+      return errors.first;
+    }
+
+    final errors = failure.fieldErrors;
+
+    return SigninErrors(
+      email: firstError(errors['email']),
+      password: firstError(errors['password']),
+    );
   }
 
   String _mapFailureToGlobalMessage(Failure failure) {

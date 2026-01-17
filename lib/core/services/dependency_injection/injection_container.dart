@@ -7,6 +7,8 @@ import 'package:furniture_ecommerce_app/core/services/storage/secure_storage_ser
 import 'package:furniture_ecommerce_app/features/authentication/data/datasources/auth_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/authentication/data/repositories/auth_respository_impl.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/clear_session_usecase.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/get_current_user_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signin_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
@@ -115,6 +117,14 @@ Future<void> initDependencies() async {
   
   sl.registerLazySingleton<LogoutUseCase>(
     () => LogoutUseCase(sl<AuthRepository>()),
+  );
+
+  sl.registerLazySingleton<GetCurrentUserUseCase>(
+    () => GetCurrentUserUseCase(sl<AuthRepository>()),
+  );
+
+  sl.registerLazySingleton<ClearSessionUseCase>(
+    () => ClearSessionUseCase(sl<AuthRepository>()),
   );
 
   // Blocs

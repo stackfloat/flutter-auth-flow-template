@@ -1,6 +1,9 @@
+import 'package:equatable/equatable.dart';
 import '../errors/validation_exception.dart';
 
-class Email {
+class Email extends Equatable {
+  static final _regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
   final String value;
 
   Email(String input)
@@ -11,6 +14,9 @@ class Email {
   }
 
   static bool isValid(String email) {
-    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+    return _regex.hasMatch(email.trim());
   }
+
+  @override
+  List<Object?> get props => [value];
 }

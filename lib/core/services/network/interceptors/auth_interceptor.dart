@@ -30,7 +30,14 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final statusCode = err.response?.statusCode;
-    if (statusCode == 401 || statusCode == 403) {
+    final requestPath = err.requestOptions.path;
+    final hasAuthHeader =
+        err.requestOptions.headers['Authorization'] != null;
+    final isAuthEndpoint = _isAuthEndpoint(requestPath);
+
+    if (hasAuthHeader &&
+        !isAuthEndpoint &&
+        (statusCode == 401 || statusCode == 403)) {
       // TODO: Implement token refresh logic here
       // For now, just clear auth data and notify listeners
       await _secureStorage.clearAuthData();
@@ -38,5 +45,9 @@ class AuthInterceptor extends Interceptor {
     }
 
     return handler.next(err);
+  }
+
+  bool _isAuthEndpoint(String path) {
+    return path.endsWith('/login') || path.endsWith('/register');
   }
 }

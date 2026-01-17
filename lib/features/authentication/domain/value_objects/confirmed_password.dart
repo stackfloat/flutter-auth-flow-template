@@ -1,7 +1,8 @@
+import 'package:equatable/equatable.dart';
 import '../errors/validation_exception.dart';
 import 'password.dart';
 
-class ConfirmedPassword {
+class ConfirmedPassword extends Equatable {
   final Password password;
 
   ConfirmedPassword({
@@ -12,4 +13,7 @@ class ConfirmedPassword {
       throw const PasswordMismatchException();
     }
   }
+
+  @override
+  List<Object?> get props => [password];
 }

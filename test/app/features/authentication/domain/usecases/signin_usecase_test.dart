@@ -55,7 +55,8 @@ void main() {
     );
 
     // Assert
-    verify(() => mockAuthRepository.login(tEmail, tPassword)).called(1);
+    verify(() => mockAuthRepository.login(tEmail.value, tPassword.value))
+        .called(1);
     expect(result, Left(ApiFailure(message: 'API call failed')));
     verifyNoMoreInteractions(mockAuthRepository);
   });

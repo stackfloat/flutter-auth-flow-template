@@ -7,6 +7,7 @@ import 'package:furniture_ecommerce_app/features/authentication/data/datasources
 import 'package:furniture_ecommerce_app/features/authentication/data/models/user_model.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/entities/user.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/account_disabled_failure.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/auth_validation_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/email_already_exists_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/invalid_credentials_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/username_already_exists_failure.dart';
@@ -104,6 +105,10 @@ class AuthRepositoryImpl implements AuthRepository {
       if (errors.containsKey('username') || errors.containsKey('name')) {
         return const UsernameAlreadyExistsFailure();
       }
+
+      if (errors.isNotEmpty) {
+        return AuthValidationFailure(errors);
+      }
     }
 
     return _mapSystemFailure(failure);
@@ -119,6 +124,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (statusCode == 403) {
         return const AccountDisabledFailure();
+      }
+
+      final errors = failure.errors ?? {};
+      if (errors.isNotEmpty) {
+        return AuthValidationFailure(errors);
       }
     }
 

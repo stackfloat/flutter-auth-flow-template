@@ -11,7 +11,9 @@ import 'package:furniture_ecommerce_app/core/services/dependency_injection/injec
 import 'package:furniture_ecommerce_app/core/services/logging/app_bloc_observer.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_theme.dart';
 import 'package:furniture_ecommerce_app/core/services/auth/auth_session_notifier.dart';
-import 'package:furniture_ecommerce_app/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/clear_session_usecase.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/get_current_user_usecase.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_state.dart';
 import 'package:furniture_ecommerce_app/firebase_options.dart';
@@ -63,9 +65,9 @@ void main() {
 
       // Option C: hydrate auth BEFORE building the router to avoid any
       // sign-in/home flicker caused by AuthStatus.unknown redirects.
-      final authRepository = sl<AuthRepository>();
+      final getCurrentUserUseCase = sl<GetCurrentUserUseCase>();
       final authSessionNotifier = sl<AuthSessionNotifier>();
-      final user = await authRepository.getUser();
+      final user = await getCurrentUserUseCase();
       final initialAuthState = user != null
           ? AuthState.authenticated(user)
           : AuthState.unauthenticated();
@@ -75,7 +77,9 @@ void main() {
       runApp(
         BlocProvider(
           create: (_) => AuthBloc(
-            authRepository,
+            getCurrentUserUseCase,
+            sl<LogoutUseCase>(),
+            sl<ClearSessionUseCase>(),
             authSessionNotifier,
             initialState: initialAuthState,
           ),

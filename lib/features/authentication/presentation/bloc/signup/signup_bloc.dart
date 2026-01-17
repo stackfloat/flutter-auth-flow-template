@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/errors/failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/errors/validation_exception.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/auth_failure.dart';
+import 'package:furniture_ecommerce_app/features/authentication/domain/failures/auth_validation_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/email_already_exists_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/failures/username_already_exists_failure.dart';
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_params.dart';
@@ -249,6 +250,24 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
 
     if (failure is UsernameAlreadyExistsFailure) {
       return SignupErrors(name: 'Username already exists');
+    }
+
+    if (failure is AuthValidationFailure) {
+      String? firstError(List<String>? errors) {
+        if (errors == null || errors.isEmpty) return null;
+        return errors.first;
+      }
+
+      final errors = failure.fieldErrors;
+
+      return SignupErrors(
+        name: firstError(errors['name'] ?? errors['username']),
+        email: firstError(errors['email']),
+        password: firstError(errors['password']),
+        confirmPassword: firstError(
+          errors['confirm_password'] ?? errors['password_confirmation'],
+        ),
+      );
     }
 
     return SignupErrors.empty;
