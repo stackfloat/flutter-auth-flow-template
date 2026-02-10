@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furniture_ecommerce_app/core/common/widgets/main_scaffold.dart';
 import 'package:furniture_ecommerce_app/core/routing/go_router_refresh_stream.dart';
 import 'package:furniture_ecommerce_app/core/common/screens/not_found_screen.dart';
 import 'package:furniture_ecommerce_app/core/services/dependency_injection/injection_container.dart';
@@ -26,29 +26,19 @@ GoRouter createRouter({
   return GoRouter(
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     initialLocation: initialLocation,
-    // debugLogDiagnostics: kDebugMode,
     errorBuilder: (context, state) => NotFoundScreen(
       error: state.error,
       location: state.uri.toString(),
     ),
     redirect: (context, state) {
       final authStatus = authBloc.state.status;
-      // Use the actual URL path (no query params) instead of matchedLocation,
-      // which becomes tricky once you add path params/nesting.
       final currentLocation = state.uri.path;
-
       final isPublicRoute = _publicRoutes.contains(currentLocation);
 
-      // With Option C we hydrate auth before building the router, so unknown
-      // should not be reachable in normal startup.
-
-      // Not authenticated → block protected routes
-      if (authStatus == AuthStatus.unauthenticated) {
-        // Block protected routes
-        if (!isPublicRoute) return '/signin';
+      if (authStatus == AuthStatus.unauthenticated && !isPublicRoute) {
+        return '/signin';
       }
 
-      // Authenticated → block auth pages
       if (authStatus == AuthStatus.authenticated && isPublicRoute) {
         return '/';
       }
@@ -56,12 +46,12 @@ GoRouter createRouter({
       return null;
     },
     routes: [
-      // Public Routes (No authentication required)
+      // ------------------ PUBLIC ROUTES ------------------
       GoRoute(
         path: '/signin',
         name: 'signin',
         builder: (context, state) => BlocProvider(
-          create: (context) => sl<SigninBloc>(),
+          create: (_) => sl<SigninBloc>(),
           child: const LoginScreen(),
         ),
       ),
@@ -69,36 +59,72 @@ GoRouter createRouter({
         path: '/signup',
         name: 'signup',
         builder: (context, state) => BlocProvider(
-          create: (context) => sl<SignupBloc>(),
+          create: (_) => sl<SignupBloc>(),
           child: const SignupScreen(),
         ),
       ),
 
-      // Protected Routes (Authentication required)
-      GoRoute(
-        path: '/',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
-      ),
-      GoRoute(
-        path: '/products',
-        name: 'products',
-        builder: (context, state) => const ProductsScreen(),
-      ),
-      GoRoute(
-        path: '/cart',
-        name: 'cart',
-        builder: (context, state) => const CartScreen(),
-      ),
-      GoRoute(
-        path: '/profile',
-        name: 'profile',
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(
-        path: '/settings',
-        name: 'settings',
-        builder: (context, state) => const SettingsScreen(),
+      // ------------------ PROTECTED ROUTES ------------------
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainScaffold(navigationShell: navigationShell);
+        },
+        branches: [
+          // ------------------ HOME ------------------
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                name: 'home',
+                builder: (_, __) => const HomeScreen(),
+              ),
+            ],
+          ),
+
+          // ------------------ PRODUCTS ------------------
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/products',
+                name: 'products',
+                builder: (_, __) => const ProductsScreen(),
+              ),
+            ],
+          ),
+
+          // ------------------ CART ------------------
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/cart',
+                name: 'cart',
+                builder: (_, __) => const CartScreen(),
+              ),
+            ],
+          ),
+
+          // ------------------ PROFILE ------------------
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                name: 'profile',
+                builder: (_, __) => const ProfileScreen(),
+              ),
+            ],
+          ),
+
+          // ------------------ SETTINGS ------------------
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                name: 'settings',
+                builder: (_, __) => const SettingsScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
