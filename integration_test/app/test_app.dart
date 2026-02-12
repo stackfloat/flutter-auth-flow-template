@@ -85,7 +85,7 @@ Widget getTestApp() {
         routerConfig: router,
         debugShowCheckedModeBanner: false,
         title: 'Furniture Ecommerce App',
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.light(),
         themeMode: ThemeMode.light,
       ),
     ),

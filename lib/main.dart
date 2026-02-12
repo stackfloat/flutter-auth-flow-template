@@ -138,7 +138,7 @@ class _MainAppState extends State<MainApp> {
         routerConfig: _router!,
         debugShowCheckedModeBanner: false,
         title: 'Furniture Ecommerce App',
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.light(),
         themeMode: ThemeMode.light,
       ),
     );
