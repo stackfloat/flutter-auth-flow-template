@@ -35,16 +35,32 @@ class AuthInterceptor extends Interceptor {
         err.requestOptions.headers['Authorization'] != null;
     final isAuthEndpoint = _isAuthEndpoint(requestPath);
 
-    if (hasAuthHeader &&
-        !isAuthEndpoint &&
-        (statusCode == 401 || statusCode == 403)) {
-      // TODO: Implement token refresh logic here
-      // For now, just clear auth data and notify listeners
+    if (hasAuthHeader && !isAuthEndpoint && statusCode == 401) {
       await _secureStorage.clearAuthData();
       _sessionNotifier?.notifyUnauthorized();
     }
 
+    if (hasAuthHeader &&
+        !isAuthEndpoint &&
+        statusCode == 403 &&
+        _isAccountDisabledResponse(err.response?.data)) {
+      await _secureStorage.clearAuthData();
+      _sessionNotifier?.notifyAccountDisabled();
+    }
+
     return handler.next(err);
+  }
+
+  bool _isAccountDisabledResponse(dynamic data) {
+    if (data is! Map<String, dynamic>) return false;
+
+    final code = data['code']?.toString().toLowerCase();
+    final reason = data['reason']?.toString().toLowerCase();
+    final message = data['message']?.toString().toLowerCase();
+
+    return code == 'account_disabled' ||
+        reason == 'account_disabled' ||
+        (message != null && message.contains('account disabled'));
   }
 
   bool _isAuthEndpoint(String path) {

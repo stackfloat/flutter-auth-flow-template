@@ -27,10 +27,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoggedIn>(_onLoggedIn);
     on<LoggedOut>(_onLoggedOut);
     on<SessionExpired>(_onSessionExpired);
+    on<AccountDisabledDetected>(_onAccountDisabledDetected);
 
     _sessionSubscription = _sessionNotifier.stream.listen((event) {
       if (event == AuthSessionEvent.unauthorized) {
         add(const SessionExpired());
+      } else if (event == AuthSessionEvent.accountDisabled) {
+        add(const AccountDisabledDetected());
       }
     });
   }
@@ -64,6 +67,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     await clearSessionUseCase();
     emit(AuthState.unauthenticated());
+  }
+
+  Future<void> _onAccountDisabledDetected(
+    AccountDisabledDetected event,
+    Emitter<AuthState> emit,
+  ) async {
+    await clearSessionUseCase();
+    emit(AuthState.accountDisabled());
   }
 
   @override

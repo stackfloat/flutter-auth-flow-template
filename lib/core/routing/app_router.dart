@@ -34,8 +34,11 @@ GoRouter createRouter({
       final authStatus = authBloc.state.status;
       final currentLocation = state.uri.path;
       final isPublicRoute = _publicRoutes.contains(currentLocation);
+      final isUnauthenticatedFlow =
+          authStatus == AuthStatus.unauthenticated ||
+          authStatus == AuthStatus.accountDisabled;
 
-      if (authStatus == AuthStatus.unauthenticated && !isPublicRoute) {
+      if (isUnauthenticatedFlow && !isPublicRoute) {
         return '/signin';
       }
 

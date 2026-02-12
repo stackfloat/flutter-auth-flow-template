@@ -27,3 +27,7 @@ class LoggedOut extends AuthEvent {
 class SessionExpired extends AuthEvent {
   const SessionExpired();
 }
+
+class AccountDisabledDetected extends AuthEvent {
+  const AccountDisabledDetected();
+}

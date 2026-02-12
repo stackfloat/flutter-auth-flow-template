@@ -1,6 +1,6 @@
 import 'dart:async';
 
-enum AuthSessionEvent { unauthorized }
+enum AuthSessionEvent { unauthorized, accountDisabled }
 
 class AuthSessionNotifier {
   final StreamController<AuthSessionEvent> _controller =
@@ -11,6 +11,11 @@ class AuthSessionNotifier {
   void notifyUnauthorized() {
     if (_controller.isClosed) return;
     _controller.add(AuthSessionEvent.unauthorized);
+  }
+
+  void notifyAccountDisabled() {
+    if (_controller.isClosed) return;
+    _controller.add(AuthSessionEvent.accountDisabled);
   }
 
   Future<void> dispose() async {

@@ -5,6 +5,7 @@ import 'package:furniture_ecommerce_app/core/common/widgets/error_text_widget.da
 import 'package:furniture_ecommerce_app/core/common/widgets/text_field_widget.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_event.dart';
+import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_state.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -172,6 +173,9 @@ class _SigninGlobalErrors extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accountDisabled = context.select(
+      (AuthBloc bloc) => bloc.state.status == AuthStatus.accountDisabled,
+    );
     final state = context.select((SigninBloc bloc) => (
           bloc.state.serverError,
           bloc.state.authError,
@@ -179,12 +183,16 @@ class _SigninGlobalErrors extends StatelessWidget {
     final serverError = state.$1;
     final authError = state.$2;
 
-    if (serverError == null && authError == null) {
+    if (!accountDisabled && serverError == null && authError == null) {
       return const SizedBox.shrink();
     }
 
     return Column(
       children: [
+        if (accountDisabled)
+          const ErrorTextWidget(
+            errorMessage: 'Your account has been disabled. Contact support.',
+          ),
         if (serverError != null) ErrorTextWidget(errorMessage: serverError),
         if (authError != null) ErrorTextWidget(errorMessage: authError),
       ],
