@@ -13,6 +13,7 @@ import 'package:furniture_ecommerce_app/features/cart/presentation/screens/cart_
 import 'package:furniture_ecommerce_app/features/home/presentation/screens/home_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/products_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:furniture_ecommerce_app/features/search/presentation/screens/search_screen.dart';
 import 'package:furniture_ecommerce_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -110,9 +111,9 @@ GoRouter createRouter({
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/profile',
-                name: 'profile',
-                builder: (_, __) => const ProfileScreen(),
+                path: '/search',
+                name: 'search',
+                builder: (_, __) => const SearchScreen(),
               ),
             ],
           ),
@@ -121,9 +122,9 @@ GoRouter createRouter({
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/settings',
-                name: 'settings',
-                builder: (_, __) => const SettingsScreen(),
+                path: '/profile',
+                name: 'profile',
+                builder: (_, __) => const ProfileScreen(),
               ),
             ],
           ),
