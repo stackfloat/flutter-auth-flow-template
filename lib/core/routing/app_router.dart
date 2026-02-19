@@ -17,9 +17,9 @@ import 'package:furniture_ecommerce_app/features/home/presentation/screens/home_
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/categories_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/product_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/products_screen.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:furniture_ecommerce_app/features/search/presentation/screens/search_screen.dart';
-import 'package:furniture_ecommerce_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 
 // Define public routes (routes that don't require authentication)
@@ -125,7 +125,10 @@ GoRouter createRouter({
               GoRoute(
                 path: '/products',
                 name: 'products',
-                builder: (_, _) => const ProductsScreen(),
+                builder: (_, _) => BlocProvider(
+                  create: (_) => sl<ProductsBloc>()..add(GetProductsEvent()),
+                  child: const ProductsScreen(),
+                ),
               ),
             ],
           ),

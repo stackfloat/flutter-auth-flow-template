@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
 import 'package:go_router/go_router.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
-import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
-import 'package:furniture_ecommerce_app/features/products/presentation/widgets/products_category_list.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/widgets/product_filter_sheet.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/widgets/product_grid_card.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/widgets/products_category_list.dart';
 
 class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
@@ -33,48 +35,75 @@ class ProductsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-            sliver: SliverToBoxAdapter(
-              child: ProductsCategoryList(
-                categories: _categories,
+      body: BlocBuilder<ProductsBloc, ProductsState>(
+        builder: (context, state) {
+          if (state is ProductsLoading || state is ProductsInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is ProductsLoadingFailure) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                  style: context.typography.body,
+                ),
               ),
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16.h,
-                crossAxisSpacing: 12.w,
-                childAspectRatio: 0.7,
+            );
+          }
+
+          if (state is! ProductsLoaded) {
+            return const SizedBox.shrink();
+          }
+
+          final categoryNames = state.categories.isEmpty
+              ? const ['All']
+              : state.categories.map((e) => e.name).toList();
+
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+                sliver: SliverToBoxAdapter(
+                  child: ProductsCategoryList(categories: categoryNames),
+                ),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final product = _products[index];
-                  return ProductGridCard(
-                    title: product.title,
-                    price: product.price,
-                    imagePath: product.imagePath,
-                    isFavorite: product.isFavorite,
-                    onFavoriteTap: () {},
-                    onTap: () => context.pushNamed(
-                      'product',
-                      pathParameters: {'id': product.id},
-                    ),
-                  );
-                },
-                childCount: _products.length,
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16.h,
+                    crossAxisSpacing: 12.w,
+                    childAspectRatio: 0.7,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final product = state.products[index];
+                      return ProductGridCard(
+                        title: product.name,
+                        price: product.price,
+                        imagePath: product.photo,
+                        isFavorite: product.isFavorite,
+                        onFavoriteTap: () {},
+                        onTap: () => context.pushNamed(
+                          'product',
+                          pathParameters: {'id': product.id.toString()},
+                        ),
+                      );
+                    },
+                    childCount: state.products.length,
+                  ),
+                ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 16.h),
-          ),
-        ],
+              SliverToBoxAdapter(
+                child: SizedBox(height: 16.h),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -88,62 +117,3 @@ class ProductsScreen extends StatelessWidget {
     );
   }
 }
-
-class _ProductUiModel {
-  final String id;
-  final String title;
-  final double price;
-  final String imagePath;
-  final bool isFavorite;
-
-  const _ProductUiModel({
-    required this.id,
-    required this.title,
-    required this.price,
-    required this.imagePath,
-    this.isFavorite = false,
-  });
-}
-
-const _categories = ['All', 'Sofa', 'Ceiling', 'Table Lamp', 'Floor'];
-
-const _products = [
-  _ProductUiModel(
-    id: '1',
-    title: 'Teak Bench SofaTeak Bench SofaTeak Bench SofaTeak Bench Sofa',
-    price: 289.00,
-    imagePath: 'assets/images/products/product_1.jpg',
-    isFavorite: true,
-  ),
-  _ProductUiModel(
-    id: '2',
-    title: 'Modern TV UnitModern TV UnitModern TV UnitModern TV Unit',
-    price: 349.00,
-    imagePath: 'assets/images/products/product_2.jpg',
-  ),
-  _ProductUiModel(
-    id: '3',
-    title: 'Blue Fabric Sofa',
-    price: 499.00,
-    imagePath: 'assets/images/products/product_3.jpeg',
-  ),
-  _ProductUiModel(
-    id: '4',
-    title: 'Walnut Bedroom Set very stylish',
-    price: 799.00,
-    imagePath: 'assets/images/products/product_4.jpg',
-    isFavorite: true,
-  ),
-  _ProductUiModel(
-    id: '5',
-    title: 'Sectional Sofa',
-    price: 629.00,
-    imagePath: 'assets/images/products/product_5.jpeg',
-  ),
-  _ProductUiModel(
-    id: '6',
-    title: 'Living Room Set',
-    price: 549.00,
-    imagePath: 'assets/images/products/product_6.png',
-  ),
-];

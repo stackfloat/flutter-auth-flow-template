@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProductGridCard extends StatelessWidget {
   final String title;
@@ -41,9 +42,23 @@ class ProductGridCard extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: Image.asset(
-                        imagePath,
+                      child: CachedNetworkImage(
+                        imageUrl: imagePath,
                         fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: AppColors.surface,
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: AppColors.surface,
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            size: 22.sp,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                        ),
                       ),
                     ),
                     Positioned(

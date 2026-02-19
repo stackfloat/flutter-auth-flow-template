@@ -14,6 +14,11 @@ import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_bloc.dart';
+import 'package:furniture_ecommerce_app/features/products/data/datasources/product_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/products/data/repositories/product_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_use_case.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -134,6 +139,32 @@ Future<void> initDependencies() async {
 
   sl.registerFactory<SignupBloc>(
     () => SignupBloc(sl<SignupUseCase>()),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Features - Products
+  // ---------------------------------------------------------------------------
+
+  // Data Sources
+  sl.registerLazySingleton<ProductRemoteDataSource>(
+    () => ProductRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(
+      sl<ProductRemoteDataSource>(),
+    ),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetProductsUseCase>(
+    () => GetProductsUseCase(sl<ProductRepository>()),
+  );
+
+  // Blocs
+  sl.registerFactory<ProductsBloc>(
+    () => ProductsBloc(sl<GetProductsUseCase>()),
   );
 
   // ---------------------------------------------------------------------------
