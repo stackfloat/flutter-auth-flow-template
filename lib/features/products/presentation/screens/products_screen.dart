@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
 import 'package:go_router/go_router.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/widgets/product_filter_sheet.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/widgets/product_grid_card.dart';
@@ -58,16 +59,30 @@ class ProductsScreen extends StatelessWidget {
             return const SizedBox.shrink();
           }
 
-          final categoryNames = state.categories.isEmpty
-              ? const ['All']
-              : state.categories.map((e) => e.name).toList();
+          final categories = state.categories.isEmpty
+              ? const [Category(id: 0, name: 'All')]
+              : [const Category(id: 0, name: 'All'), ...state.categories];
+          final selectedCategoryId =
+              state.selectedCategoryId.isEmpty ? '0' : state.selectedCategoryId;
 
           return CustomScrollView(
             slivers: [
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
                 sliver: SliverToBoxAdapter(
-                  child: ProductsCategoryList(categories: categoryNames),
+                  child: ProductsCategoryList(
+                    categories: categories,
+                    selectedCategoryId: selectedCategoryId,
+                    onCategorySelected: (category) {
+                      context.read<ProductsBloc>().add(
+                            ProductCategoryChanged(
+                              categoryId: category.id == 0
+                                  ? ''
+                                  : category.id.toString(),
+                            ),
+                          );
+                    },
+                  ),
                 ),
               ),
               SliverPadding(

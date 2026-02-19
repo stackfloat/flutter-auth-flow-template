@@ -2,29 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
 
-class ProductsCategoryList extends StatefulWidget {
-  final List<String> categories;
-  final ValueChanged<String>? onCategorySelected;
+class ProductsCategoryList extends StatelessWidget {
+  final List<Category> categories;
+  final String selectedCategoryId;
+  final ValueChanged<Category>? onCategorySelected;
 
   const ProductsCategoryList({
     super.key,
     required this.categories,
+    required this.selectedCategoryId,
     this.onCategorySelected,
   });
-
-  @override
-  State<ProductsCategoryList> createState() => _ProductsCategoryListState();
-}
-
-class _ProductsCategoryListState extends State<ProductsCategoryList> {
-  late String _selectedCategory;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedCategory = widget.categories.first;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,18 +22,15 @@ class _ProductsCategoryListState extends State<ProductsCategoryList> {
       height: 40.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: widget.categories.length,
+        itemCount: categories.length,
         separatorBuilder: (context, index) => SizedBox(width: 10.w),
         itemBuilder: (context, index) {
-          final category = widget.categories[index];
-          final isSelected = category == _selectedCategory;
+          final category = categories[index];
+          final isSelected = category.id.toString() == selectedCategoryId;
 
           return InkWell(
             onTap: () {
-              setState(() {
-                _selectedCategory = category;
-              });
-              widget.onCategorySelected?.call(category);
+              onCategorySelected?.call(category);
             },
             borderRadius: BorderRadius.circular(10.r),
             child: AnimatedContainer(
@@ -54,7 +41,7 @@ class _ProductsCategoryListState extends State<ProductsCategoryList> {
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Text(
-                category,
+                category.name,
                 style: context.typography.body.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,

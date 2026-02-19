@@ -22,16 +22,19 @@ final class ProductsLoaded extends ProductsState {
   final List<Category> categories;
   final List<ProductColor> colors;
   final List<ProductMaterial> materials;
+  final String selectedCategoryId;
 
   const ProductsLoaded({
     required this.products,
     this.categories = const [],
     this.colors = const [],
     this.materials = const [],
+    this.selectedCategoryId = '',
   });
 
   @override
-  List<Object> get props => [products, categories, colors, materials];
+  List<Object> get props =>
+      [products, categories, colors, materials, selectedCategoryId];
 }
 
 final class ProductsLoadingFailure extends ProductsState {

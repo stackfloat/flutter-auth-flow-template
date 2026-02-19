@@ -15,6 +15,21 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
 
   ProductsBloc(this.getProductsUseCase) : super(ProductsInitial()) {
     on<GetProductsEvent>(_onGetProducts);
+    on<ProductCategoryChanged>(_onProductCategoryChanged);
+  }
+
+  Future<void> _onProductCategoryChanged(
+    ProductCategoryChanged event,
+    Emitter<ProductsState> emit,
+  ) async {
+    add(
+      GetProductsEvent(
+        page: 1,
+        categoryId: event.categoryId,
+        search: '',
+        isInitialLoad: false,
+      ),
+    );
   }
 
   Future<void> _onGetProducts(
@@ -23,7 +38,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     emit(ProductsLoading());
     final result = await getProductsUseCase(
       GetProductsParams(
-        category: event.category,
+        categoryId: event.categoryId,
         search: event.search,
         page: event.page,
         isInitialLoad: event.isInitialLoad,
@@ -43,6 +58,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
         materials: event.isInitialLoad || data.materials.isNotEmpty
             ? data.materials
             : (previousState?.materials ?? const []),
+        selectedCategoryId: event.categoryId,
       )),
     );
   }
