@@ -3,9 +3,9 @@ import 'package:furniture_ecommerce_app/features/products/domain/entities/produc
 class ProductModel extends Product {
   const ProductModel({
     required super.id,
-    required super.title,
+    required super.name,
     required super.price,
-    required super.imagePath,
+    required super.photo,
     required super.isFavorite,
   });
 
@@ -21,7 +21,7 @@ class ProductModel extends Product {
       throw const FormatException('Product id must be a valid integer');
     }
 
-    final title = json['title'] is String ? json['title'] as String : '';
+    final name = json['name'] is String ? json['name'] as String : '';
 
     final priceRaw = json['price'];
     final price = priceRaw is int
@@ -30,15 +30,16 @@ class ProductModel extends Product {
             ? priceRaw.toDouble()
             : (double.tryParse(priceRaw?.toString() ?? '') ?? 0.0);
 
-    final imagePath =
-        json['imagePath'] is String ? json['imagePath'] as String : '';
+    final photo =
+        json['photo'] is String ? json['photo'] as String : '';
+
 
     return ProductModel(
       id: id,
-      title: title,
+      name: name,
       price: price.isNaN ? 0.0 : price,
-      imagePath: imagePath,
-      isFavorite: json['isFavorite'] == true,
+      photo: photo,
+      isFavorite: json['is_favorite'] == true
     );
   }
 }
