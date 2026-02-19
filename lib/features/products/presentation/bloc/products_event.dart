@@ -8,6 +8,18 @@ sealed class ProductsEvent extends Equatable {
 }
 
 final class GetProductsEvent extends ProductsEvent {
+  final int page;
+  final String category;
+  final String search;
+  final bool isInitialLoad;
+
+  const GetProductsEvent({
+    this.page = 1,
+    this.category = '',
+    this.search = '',
+    this.isInitialLoad = false,
+  });
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [page, category, search, isInitialLoad];
 }

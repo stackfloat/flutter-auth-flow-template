@@ -126,7 +126,8 @@ GoRouter createRouter({
                 path: '/products',
                 name: 'products',
                 builder: (_, _) => BlocProvider(
-                  create: (_) => sl<ProductsBloc>()..add(GetProductsEvent()),
+                  create: (_) =>
+                      sl<ProductsBloc>()..add(const GetProductsEvent(isInitialLoad: true)),
                   child: const ProductsScreen(),
                 ),
               ),

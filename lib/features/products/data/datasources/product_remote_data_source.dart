@@ -18,6 +18,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       '/products',
       queryParameters: {
         'page': params.page,
+        if (params.category.isNotEmpty) 'category': params.category,
+        if (params.search.isNotEmpty) 'search': params.search,
+        if (params.isInitialLoad) 'initial': 1,
       },
       parser: (data) {
         if (data is! Map<String, dynamic>) {
