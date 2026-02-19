@@ -15,9 +15,22 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   ResultFuture<List<ProductModel>> getProducts() {
     return _dioClient.get<List<ProductModel>>(
       '/products',
-      parser: (data) => (data as List)
-          .map((e) => ProductModel.fromApiJson(e as Map<String, dynamic>))
-          .toList(),
+      parser: (data) {
+        if (data is! Map<String, dynamic>) {
+          throw FormatException('Expected object response, got: ${data.runtimeType}');
+        }
+        final products = data['products'];
+        if (products is! Map) {
+          throw FormatException('Missing or invalid "products" in response');
+        }
+        final productsData = products['data'];
+        if (productsData is! List) {
+          throw FormatException('Missing or invalid "products.data" in response');
+        }
+        return productsData
+            .map((e) => ProductModel.fromApiJson(e as Map<String, dynamic>))
+            .toList();
+      },
     );
   }
 }
