@@ -13,8 +13,16 @@ final class ProductsInitial extends ProductsState {
 }
 
 final class ProductsLoading extends ProductsState {
+  final List<Category> categories;
+  final String selectedCategoryId;
+
+  const ProductsLoading({
+    this.categories = const [],
+    this.selectedCategoryId = '',
+  });
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [categories, selectedCategoryId];
 }
 
 final class ProductsLoaded extends ProductsState {

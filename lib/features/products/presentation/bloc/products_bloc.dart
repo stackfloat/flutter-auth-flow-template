@@ -35,7 +35,12 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   Future<void> _onGetProducts(
       GetProductsEvent event, Emitter<ProductsState> emit) async {
     final previousState = state is ProductsLoaded ? state as ProductsLoaded : null;
-    emit(ProductsLoading());
+    emit(
+      ProductsLoading(
+        categories: previousState?.categories ?? const [],
+        selectedCategoryId: event.categoryId,
+      ),
+    );
     final result = await getProductsUseCase(
       GetProductsParams(
         categoryId: event.categoryId,

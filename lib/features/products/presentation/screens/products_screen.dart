@@ -38,10 +38,6 @@ class ProductsScreen extends StatelessWidget {
       ),
       body: BlocBuilder<ProductsBloc, ProductsState>(
         builder: (context, state) {
-          if (state is ProductsLoading || state is ProductsInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           if (state is ProductsLoadingFailure) {
             return Center(
               child: Padding(
@@ -55,70 +51,94 @@ class ProductsScreen extends StatelessWidget {
             );
           }
 
-          if (state is! ProductsLoaded) {
-            return const SizedBox.shrink();
-          }
+          final loadedState = state is ProductsLoaded ? state : null;
+          final loadingState = state is ProductsLoading ? state : null;
 
-          final categories = state.categories.isEmpty
+          final rawCategories = loadedState?.categories ?? loadingState?.categories ?? const <Category>[];
+          final categories = rawCategories.isEmpty
               ? const [Category(id: 0, name: 'All')]
-              : [const Category(id: 0, name: 'All'), ...state.categories];
+              : [const Category(id: 0, name: 'All'), ...rawCategories];
+
+          final selectedCategoryIdRaw =
+              loadedState?.selectedCategoryId ?? loadingState?.selectedCategoryId ?? '';
           final selectedCategoryId =
-              state.selectedCategoryId.isEmpty ? '0' : state.selectedCategoryId;
+              selectedCategoryIdRaw.isEmpty ? '0' : selectedCategoryIdRaw;
 
           return CustomScrollView(
             slivers: [
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-                sliver: SliverToBoxAdapter(
-                  child: ProductsCategoryList(
-                    categories: categories,
-                    selectedCategoryId: selectedCategoryId,
-                    onCategorySelected: (category) {
-                      context.read<ProductsBloc>().add(
-                            ProductCategoryChanged(
-                              categoryId: category.id == 0
-                                  ? ''
-                                  : category.id.toString(),
-                            ),
-                          );
-                    },
+              _buildCategorySection(
+                context: context,
+                categories: categories,
+                selectedCategoryId: selectedCategoryId,
+              ),
+              if (loadedState != null)
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16.h,
+                      crossAxisSpacing: 12.w,
+                      childAspectRatio: 0.7,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final product = loadedState.products[index];
+                        return ProductGridCard(
+                          title: product.name,
+                          price: product.price,
+                          imagePath: product.photo,
+                          isFavorite: product.isFavorite,
+                          onFavoriteTap: () {},
+                          onTap: () => context.pushNamed(
+                            'product',
+                            pathParameters: {'id': product.id.toString()},
+                          ),
+                        );
+                      },
+                      childCount: loadedState.products.length,
+                    ),
+                  ),
+                )
+              else
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 24.h),
+                      child: const CircularProgressIndicator(),
+                    ),
                   ),
                 ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16.h,
-                    crossAxisSpacing: 12.w,
-                    childAspectRatio: 0.7,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final product = state.products[index];
-                      return ProductGridCard(
-                        title: product.name,
-                        price: product.price,
-                        imagePath: product.photo,
-                        isFavorite: product.isFavorite,
-                        onFavoriteTap: () {},
-                        onTap: () => context.pushNamed(
-                          'product',
-                          pathParameters: {'id': product.id.toString()},
-                        ),
-                      );
-                    },
-                    childCount: state.products.length,
-                  ),
-                ),
-              ),
               SliverToBoxAdapter(
                 child: SizedBox(height: 16.h),
               ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  SliverPadding _buildCategorySection({
+    required BuildContext context,
+    required List<Category> categories,
+    required String selectedCategoryId,
+  }) {
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+      sliver: SliverToBoxAdapter(
+        child: ProductsCategoryList(
+          categories: categories,
+          selectedCategoryId: selectedCategoryId,
+          onCategorySelected: (category) {
+            context.read<ProductsBloc>().add(
+                  ProductCategoryChanged(
+                    categoryId: category.id == 0 ? '' : category.id.toString(),
+                  ),
+                );
+          },
+        ),
       ),
     );
   }
