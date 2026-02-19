@@ -78,12 +78,13 @@ class ProductGridCard extends StatelessWidget {
             SizedBox(height: 10.h),
             Text(
               title,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.typography.cardTitle.copyWith(
                 color: AppColors.lightText,
-                fontSize: 15.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
+                height: 1.2,
               ),
             ),
             SizedBox(height: 4.h),

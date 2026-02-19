@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/widgets/products_category_list.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/widgets/product_filter_sheet.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/widgets/product_grid_card.dart';
-import 'package:furniture_ecommerce_app/features/products/presentation/widgets/products_top_bar.dart';
 
 class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
@@ -13,50 +14,67 @@ class ProductsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: 12.h),
-                  ProductsTopBar(
-                    onFilterTap: () => _openFilters(context),
-                  ),
-                  SizedBox(height: 20.h),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _products.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16.h,
-                      crossAxisSpacing: 12.w,
-                      childAspectRatio: 0.7,
-                    ),
-                    itemBuilder: (context, index) {
-                      final product = _products[index];
-                      return ProductGridCard(
-                        title: product.title,
-                        price: product.price,
-                        imagePath: product.imagePath,
-                        isFavorite: product.isFavorite,
-                        onFavoriteTap: () {},
-                        onTap: () => context.pushNamed(
-                          'product',
-                          pathParameters: {'id': product.id},
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 16.h),
-                ],
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: AppColors.lightBackground,
+        elevation: 0,
+        title: Text(
+          'Products',
+          style: context.typography.pageTitle,
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => _openFilters(context),
+            icon: Icon(
+              Icons.tune_rounded,
+              size: 24.sp,
+              color: AppColors.lightText,
+            ),
+          ),
+        ],
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+            sliver: SliverToBoxAdapter(
+              child: ProductsCategoryList(
+                categories: _categories,
               ),
             ),
           ),
-        ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16.h,
+                crossAxisSpacing: 12.w,
+                childAspectRatio: 0.7,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final product = _products[index];
+                  return ProductGridCard(
+                    title: product.title,
+                    price: product.price,
+                    imagePath: product.imagePath,
+                    isFavorite: product.isFavorite,
+                    onFavoriteTap: () {},
+                    onTap: () => context.pushNamed(
+                      'product',
+                      pathParameters: {'id': product.id},
+                    ),
+                  );
+                },
+                childCount: _products.length,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 16.h),
+          ),
+        ],
       ),
     );
   }
@@ -87,17 +105,19 @@ class _ProductUiModel {
   });
 }
 
+const _categories = ['All', 'Sofa', 'Ceiling', 'Table Lamp', 'Floor'];
+
 const _products = [
   _ProductUiModel(
     id: '1',
-    title: 'Teak Bench Sofa',
+    title: 'Teak Bench SofaTeak Bench SofaTeak Bench SofaTeak Bench Sofa',
     price: 289.00,
     imagePath: 'assets/images/products/product_1.jpg',
     isFavorite: true,
   ),
   _ProductUiModel(
     id: '2',
-    title: 'Modern TV Unit',
+    title: 'Modern TV UnitModern TV UnitModern TV UnitModern TV Unit',
     price: 349.00,
     imagePath: 'assets/images/products/product_2.jpg',
   ),
@@ -109,7 +129,7 @@ const _products = [
   ),
   _ProductUiModel(
     id: '4',
-    title: 'Walnut Bedroom Set',
+    title: 'Walnut Bedroom Set very stylish',
     price: 799.00,
     imagePath: 'assets/images/products/product_4.jpg',
     isFavorite: true,
