@@ -19,6 +19,11 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       queryParameters: {
         'page': params.page,
         if (params.categoryId.isNotEmpty) 'category_id': params.categoryId,
+        if (params.materialId.isNotEmpty) 'material_id': params.materialId,
+        if (params.colorId.isNotEmpty) 'color_id': params.colorId,
+        if (params.sortBy.isNotEmpty) 'sort_by': params.sortBy,
+        'min_price': params.minPrice.round(),
+        'max_price': params.maxPrice.round(),
         if (params.search.isNotEmpty) 'search': params.search,
         if (params.isInitialLoad) 'initial': 1,
       },

@@ -16,6 +16,8 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   ProductsBloc(this.getProductsUseCase) : super(ProductsInitial()) {
     on<GetProductsEvent>(_onGetProducts);
     on<ProductCategoryChanged>(_onProductCategoryChanged);
+    on<ProductFiltersUpdated>(_onProductFiltersUpdated);
+    on<ProductFiltersApplied>(_onProductFiltersApplied);
   }
 
   Future<void> _onProductCategoryChanged(
@@ -26,7 +28,59 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       GetProductsEvent(
         page: 1,
         categoryId: event.categoryId,
-        search: '',
+        isInitialLoad: false,
+      ),
+    );
+  }
+
+  void _onProductFiltersUpdated(
+    ProductFiltersUpdated event,
+    Emitter<ProductsState> emit,
+  ) {
+    if (state is ProductsLoaded) {
+      final current = state as ProductsLoaded;
+      emit(
+        current.copyWith(
+          selectedCategoryId: event.categoryId ?? current.selectedCategoryId,
+          selectedMaterialId: event.materialId ?? current.selectedMaterialId,
+          selectedColorId: event.colorId ?? current.selectedColorId,
+          selectedSortBy: event.sortBy ?? current.selectedSortBy,
+          minPrice: event.minPrice ?? current.minPrice,
+          maxPrice: event.maxPrice ?? current.maxPrice,
+        ),
+      );
+      return;
+    }
+
+    if (state is ProductsLoading) {
+      final current = state as ProductsLoading;
+      emit(
+        current.copyWith(
+          selectedCategoryId: event.categoryId ?? current.selectedCategoryId,
+          selectedMaterialId: event.materialId ?? current.selectedMaterialId,
+          selectedColorId: event.colorId ?? current.selectedColorId,
+          selectedSortBy: event.sortBy ?? current.selectedSortBy,
+          minPrice: event.minPrice ?? current.minPrice,
+          maxPrice: event.maxPrice ?? current.maxPrice,
+        ),
+      );
+    }
+  }
+
+  void _onProductFiltersApplied(
+    ProductFiltersApplied event,
+    Emitter<ProductsState> emit,
+  ) {
+    final current = _extractFiltersFromState(state);
+    add(
+      GetProductsEvent(
+        page: 1,
+        categoryId: current.selectedCategoryId,
+        materialId: current.selectedMaterialId,
+        colorId: current.selectedColorId,
+        sortBy: current.selectedSortBy,
+        minPrice: current.minPrice,
+        maxPrice: current.maxPrice,
         isInitialLoad: false,
       ),
     );
@@ -34,17 +88,47 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
 
   Future<void> _onGetProducts(
       GetProductsEvent event, Emitter<ProductsState> emit) async {
-    final previousState = state is ProductsLoaded ? state as ProductsLoaded : null;
+    final previousLoadedState =
+        state is ProductsLoaded ? state as ProductsLoaded : null;
+    final previousLoadingState =
+        state is ProductsLoading ? state as ProductsLoading : null;
+    final currentFilters = _extractFiltersFromState(state);
+
+    final selectedCategoryId = event.categoryId ?? currentFilters.selectedCategoryId;
+    final selectedMaterialId = event.materialId ?? currentFilters.selectedMaterialId;
+    final selectedColorId = event.colorId ?? currentFilters.selectedColorId;
+    final selectedSortBy = event.sortBy ?? currentFilters.selectedSortBy;
+    final minPrice = event.minPrice ?? currentFilters.minPrice;
+    final maxPrice = event.maxPrice ?? currentFilters.maxPrice;
+    final search = event.search ?? '';
+
     emit(
       ProductsLoading(
-        categories: previousState?.categories ?? const [],
-        selectedCategoryId: event.categoryId,
+        categories: previousLoadedState?.categories ??
+            previousLoadingState?.categories ??
+            const [],
+        colors:
+            previousLoadedState?.colors ?? previousLoadingState?.colors ?? const [],
+        materials: previousLoadedState?.materials ??
+            previousLoadingState?.materials ??
+            const [],
+        selectedCategoryId: selectedCategoryId,
+        selectedMaterialId: selectedMaterialId,
+        selectedColorId: selectedColorId,
+        selectedSortBy: selectedSortBy,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
       ),
     );
     final result = await getProductsUseCase(
       GetProductsParams(
-        categoryId: event.categoryId,
-        search: event.search,
+        categoryId: selectedCategoryId,
+        materialId: selectedMaterialId,
+        colorId: selectedColorId,
+        sortBy: selectedSortBy,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        search: search,
         page: event.page,
         isInitialLoad: event.isInitialLoad,
       ),
@@ -56,15 +140,66 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
         products: data.products,
         categories: event.isInitialLoad || data.categories.isNotEmpty
             ? data.categories
-            : (previousState?.categories ?? const []),
+            : (previousLoadedState?.categories ??
+                previousLoadingState?.categories ??
+                const []),
         colors: event.isInitialLoad || data.colors.isNotEmpty
             ? data.colors
-            : (previousState?.colors ?? const []),
+            : (previousLoadedState?.colors ??
+                previousLoadingState?.colors ??
+                const []),
         materials: event.isInitialLoad || data.materials.isNotEmpty
             ? data.materials
-            : (previousState?.materials ?? const []),
-        selectedCategoryId: event.categoryId,
+            : (previousLoadedState?.materials ??
+                previousLoadingState?.materials ??
+                const []),
+        selectedCategoryId: selectedCategoryId,
+        selectedMaterialId: selectedMaterialId,
+        selectedColorId: selectedColorId,
+        selectedSortBy: selectedSortBy,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
       )),
+    );
+  }
+
+  ({
+    String selectedCategoryId,
+    String selectedMaterialId,
+    String selectedColorId,
+    String selectedSortBy,
+    double minPrice,
+    double maxPrice
+  }) _extractFiltersFromState(ProductsState currentState) {
+    if (currentState is ProductsLoaded) {
+      return (
+        selectedCategoryId: currentState.selectedCategoryId,
+        selectedMaterialId: currentState.selectedMaterialId,
+        selectedColorId: currentState.selectedColorId,
+        selectedSortBy: currentState.selectedSortBy,
+        minPrice: currentState.minPrice,
+        maxPrice: currentState.maxPrice,
+      );
+    }
+
+    if (currentState is ProductsLoading) {
+      return (
+        selectedCategoryId: currentState.selectedCategoryId,
+        selectedMaterialId: currentState.selectedMaterialId,
+        selectedColorId: currentState.selectedColorId,
+        selectedSortBy: currentState.selectedSortBy,
+        minPrice: currentState.minPrice,
+        maxPrice: currentState.maxPrice,
+      );
+    }
+
+    return (
+      selectedCategoryId: '',
+      selectedMaterialId: '',
+      selectedColorId: '',
+      selectedSortBy: 'newest',
+      minPrice: 0,
+      maxPrice: 400,
     );
   }
 }

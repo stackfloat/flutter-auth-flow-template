@@ -14,15 +14,63 @@ final class ProductsInitial extends ProductsState {
 
 final class ProductsLoading extends ProductsState {
   final List<Category> categories;
+  final List<ProductColor> colors;
+  final List<ProductMaterial> materials;
   final String selectedCategoryId;
+  final String selectedMaterialId;
+  final String selectedColorId;
+  final String selectedSortBy;
+  final double minPrice;
+  final double maxPrice;
 
   const ProductsLoading({
     this.categories = const [],
+    this.colors = const [],
+    this.materials = const [],
     this.selectedCategoryId = '',
+    this.selectedMaterialId = '',
+    this.selectedColorId = '',
+    this.selectedSortBy = 'newest',
+    this.minPrice = 0,
+    this.maxPrice = 400,
   });
 
+  ProductsLoading copyWith({
+    List<Category>? categories,
+    List<ProductColor>? colors,
+    List<ProductMaterial>? materials,
+    String? selectedCategoryId,
+    String? selectedMaterialId,
+    String? selectedColorId,
+    String? selectedSortBy,
+    double? minPrice,
+    double? maxPrice,
+  }) {
+    return ProductsLoading(
+      categories: categories ?? this.categories,
+      colors: colors ?? this.colors,
+      materials: materials ?? this.materials,
+      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
+      selectedMaterialId: selectedMaterialId ?? this.selectedMaterialId,
+      selectedColorId: selectedColorId ?? this.selectedColorId,
+      selectedSortBy: selectedSortBy ?? this.selectedSortBy,
+      minPrice: minPrice ?? this.minPrice,
+      maxPrice: maxPrice ?? this.maxPrice,
+    );
+  }
+
   @override
-  List<Object> get props => [categories, selectedCategoryId];
+  List<Object> get props => [
+        categories,
+        colors,
+        materials,
+        selectedCategoryId,
+        selectedMaterialId,
+        selectedColorId,
+        selectedSortBy,
+        minPrice,
+        maxPrice,
+      ];
 }
 
 final class ProductsLoaded extends ProductsState {
@@ -31,6 +79,11 @@ final class ProductsLoaded extends ProductsState {
   final List<ProductColor> colors;
   final List<ProductMaterial> materials;
   final String selectedCategoryId;
+  final String selectedMaterialId;
+  final String selectedColorId;
+  final String selectedSortBy;
+  final double minPrice;
+  final double maxPrice;
 
   const ProductsLoaded({
     required this.products,
@@ -38,11 +91,52 @@ final class ProductsLoaded extends ProductsState {
     this.colors = const [],
     this.materials = const [],
     this.selectedCategoryId = '',
+    this.selectedMaterialId = '',
+    this.selectedColorId = '',
+    this.selectedSortBy = 'newest',
+    this.minPrice = 0,
+    this.maxPrice = 400,
   });
 
+  ProductsLoaded copyWith({
+    List<Product>? products,
+    List<Category>? categories,
+    List<ProductColor>? colors,
+    List<ProductMaterial>? materials,
+    String? selectedCategoryId,
+    String? selectedMaterialId,
+    String? selectedColorId,
+    String? selectedSortBy,
+    double? minPrice,
+    double? maxPrice,
+  }) {
+    return ProductsLoaded(
+      products: products ?? this.products,
+      categories: categories ?? this.categories,
+      colors: colors ?? this.colors,
+      materials: materials ?? this.materials,
+      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
+      selectedMaterialId: selectedMaterialId ?? this.selectedMaterialId,
+      selectedColorId: selectedColorId ?? this.selectedColorId,
+      selectedSortBy: selectedSortBy ?? this.selectedSortBy,
+      minPrice: minPrice ?? this.minPrice,
+      maxPrice: maxPrice ?? this.maxPrice,
+    );
+  }
+
   @override
-  List<Object> get props =>
-      [products, categories, colors, materials, selectedCategoryId];
+  List<Object> get props => [
+        products,
+        categories,
+        colors,
+        materials,
+        selectedCategoryId,
+        selectedMaterialId,
+        selectedColorId,
+        selectedSortBy,
+        minPrice,
+        maxPrice,
+      ];
 }
 
 final class ProductsLoadingFailure extends ProductsState {
