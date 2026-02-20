@@ -144,11 +144,36 @@ class ProductsScreen extends StatelessWidget {
   }
 
   void _openFilters(BuildContext context) {
+    final state = context.read<ProductsBloc>().state;
+    final loadedState = state is ProductsLoaded ? state : null;
+    final loadingState = state is ProductsLoading ? state : null;
+
+    final rawCategories =
+        loadedState?.categories ?? loadingState?.categories ?? const <Category>[];
+    final categories = rawCategories.isEmpty
+        ? const [Category(id: 0, name: 'All')]
+        : [const Category(id: 0, name: 'All'), ...rawCategories];
+
+    final selectedCategoryIdRaw =
+        loadedState?.selectedCategoryId ?? loadingState?.selectedCategoryId ?? '';
+    final selectedCategoryId =
+        selectedCategoryIdRaw.isEmpty ? '0' : selectedCategoryIdRaw;
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const ProductFilterSheet(),
+      builder: (_) => ProductFilterSheet(
+        categories: categories,
+        selectedCategoryId: selectedCategoryId,
+        onCategorySelected: (category) {
+          context.read<ProductsBloc>().add(
+                ProductCategoryChanged(
+                  categoryId: category.id == 0 ? '' : category.id.toString(),
+                ),
+              );
+        },
+      ),
     );
   }
 }

@@ -2,9 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
 
 class ProductFilterSheet extends StatefulWidget {
-  const ProductFilterSheet({super.key});
+  final List<Category> categories;
+  final String selectedCategoryId;
+  final ValueChanged<Category>? onCategorySelected;
+
+  const ProductFilterSheet({
+    super.key,
+    required this.categories,
+    required this.selectedCategoryId,
+    this.onCategorySelected,
+  });
 
   @override
   State<ProductFilterSheet> createState() => _ProductFilterSheetState();
@@ -13,7 +23,7 @@ class ProductFilterSheet extends StatefulWidget {
 class _ProductFilterSheetState extends State<ProductFilterSheet> {
   String _sortBy = 'Recommended';
   String _selectedMaterial = 'Wooden';
-  String _selectedCategory = 'Sofa';
+  late String _selectedCategoryId;
   int _selectedColor = 4;
   RangeValues _priceRange = const RangeValues(10, 200);
 
@@ -43,27 +53,6 @@ class _ProductFilterSheetState extends State<ProductFilterSheet> {
     'Steel',
   ];
 
-  static const _categoryOptions = [
-    'Chair',
-    'Table',
-    'Sofa',
-    'Kitchen',
-    'Decor',
-    'Bed',
-    'Wardrobe',
-    'TV Unit',
-    'Bookshelf',
-    'Dining',
-    'Office',
-    'Lighting',
-    'Outdoor',
-    'Storage',
-    'Mattress',
-    'Rugs',
-    'Sideboard',
-    '+ More',
-  ];
-
   static const _colorOptions = [
     Color(0xFFFE2A2A),
     Color(0xFF274BA0),
@@ -72,6 +61,13 @@ class _ProductFilterSheetState extends State<ProductFilterSheet> {
     Color(0xFF000000),
     Color(0xFFBFBFBF),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategoryId =
+        widget.selectedCategoryId.isEmpty ? '0' : widget.selectedCategoryId;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,20 +173,31 @@ class _ProductFilterSheetState extends State<ProductFilterSheet> {
                   SizedBox(height: 20.h),
                   _SectionLabel(text: 'Categories'),
                   SizedBox(height: 10.h),
-                  Wrap(
-                    spacing: 10.w,
-                    runSpacing: 10.h,
-                    children: _categoryOptions.map((category) {
-                      final isSelected = _selectedCategory == category;
-                      final isMore = category == '+ More';
-                      return _FilterChip(
-                        label: category,
-                        isSelected: isSelected,
-                        fillColor: isMore ? const Color(0xFFD3D7DA) : null,
-                        onTap: () => setState(() => _selectedCategory = category),
-                      );
-                    }).toList(),
-                  ),
+                  if (widget.categories.isEmpty)
+                    Text(
+                      'No categories available',
+                      style: context.typography.body.copyWith(
+                        fontSize: 14.sp,
+                        color: AppColors.lightText.withValues(alpha: 0.7),
+                      ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 10.w,
+                      runSpacing: 10.h,
+                      children: widget.categories.map((category) {
+                        final categoryId = category.id.toString();
+                        final isSelected = _selectedCategoryId == categoryId;
+                        return _FilterChip(
+                          label: category.name,
+                          isSelected: isSelected,
+                          onTap: () {
+                            setState(() => _selectedCategoryId = categoryId);
+                            widget.onCategorySelected?.call(category);
+                          },
+                        );
+                      }).toList(),
+                    ),
                   SizedBox(height: 20.h),
                   _SectionLabel(text: 'Colors'),
                   SizedBox(height: 10.h),
@@ -315,13 +322,11 @@ class _FilterChip extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback? onTap;
-  final Color? fillColor;
 
   const _FilterChip({
     required this.label,
     required this.isSelected,
     this.onTap,
-    this.fillColor,
   });
 
   @override
@@ -333,7 +338,7 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : (fillColor ?? Colors.transparent),
+          color: isSelected ? Colors.black : Colors.transparent,
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
             color: isSelected ? Colors.black : AppColors.border,
