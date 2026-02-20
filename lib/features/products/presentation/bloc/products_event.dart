@@ -80,3 +80,7 @@ final class ProductFiltersUpdated extends ProductsEvent {
 final class ProductFiltersApplied extends ProductsEvent {
   const ProductFiltersApplied();
 }
+
+final class ProductsNextPageRequested extends ProductsEvent {
+  const ProductsNextPageRequested();
+}

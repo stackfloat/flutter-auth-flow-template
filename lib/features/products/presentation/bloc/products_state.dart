@@ -78,6 +78,12 @@ final class ProductsLoaded extends ProductsState {
   final List<Category> categories;
   final List<ProductColor> colors;
   final List<ProductMaterial> materials;
+  final int currentPage;
+  final int lastPage;
+  final int total;
+  final int perPage;
+  final bool isLoadingMore;
+  final bool hasMore;
   final String selectedCategoryId;
   final String selectedMaterialId;
   final String selectedColorId;
@@ -90,6 +96,12 @@ final class ProductsLoaded extends ProductsState {
     this.categories = const [],
     this.colors = const [],
     this.materials = const [],
+    this.currentPage = 1,
+    this.lastPage = 1,
+    this.total = 0,
+    this.perPage = 0,
+    this.isLoadingMore = false,
+    this.hasMore = false,
     this.selectedCategoryId = '',
     this.selectedMaterialId = '',
     this.selectedColorId = '',
@@ -103,6 +115,12 @@ final class ProductsLoaded extends ProductsState {
     List<Category>? categories,
     List<ProductColor>? colors,
     List<ProductMaterial>? materials,
+    int? currentPage,
+    int? lastPage,
+    int? total,
+    int? perPage,
+    bool? isLoadingMore,
+    bool? hasMore,
     String? selectedCategoryId,
     String? selectedMaterialId,
     String? selectedColorId,
@@ -115,6 +133,12 @@ final class ProductsLoaded extends ProductsState {
       categories: categories ?? this.categories,
       colors: colors ?? this.colors,
       materials: materials ?? this.materials,
+      currentPage: currentPage ?? this.currentPage,
+      lastPage: lastPage ?? this.lastPage,
+      total: total ?? this.total,
+      perPage: perPage ?? this.perPage,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasMore: hasMore ?? this.hasMore,
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
       selectedMaterialId: selectedMaterialId ?? this.selectedMaterialId,
       selectedColorId: selectedColorId ?? this.selectedColorId,
@@ -130,6 +154,12 @@ final class ProductsLoaded extends ProductsState {
         categories,
         colors,
         materials,
+        currentPage,
+        lastPage,
+        total,
+        perPage,
+        isLoadingMore,
+        hasMore,
         selectedCategoryId,
         selectedMaterialId,
         selectedColorId,

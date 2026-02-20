@@ -64,56 +64,76 @@ class ProductsScreen extends StatelessWidget {
           final selectedCategoryId =
               selectedCategoryIdRaw.isEmpty ? '0' : selectedCategoryIdRaw;
 
-          return CustomScrollView(
-            slivers: [
-              _buildCategorySection(
-                context: context,
-                categories: categories,
-                selectedCategoryId: selectedCategoryId,
-              ),
-              if (loadedState != null)
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16.h,
-                      crossAxisSpacing: 12.w,
-                      childAspectRatio: 0.7,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = loadedState.products[index];
-                        return ProductGridCard(
-                          title: product.name,
-                          price: product.price,
-                          imagePath: product.photo,
-                          isFavorite: product.isFavorite,
-                          onFavoriteTap: () {},
-                          onTap: () => context.pushNamed(
-                            'product',
-                            pathParameters: {'id': product.id.toString()},
-                          ),
-                        );
-                      },
-                      childCount: loadedState.products.length,
-                    ),
-                  ),
-                )
-              else
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 24.h),
-                      child: const CircularProgressIndicator(),
-                    ),
-                  ),
+          return NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (loadedState == null || loadedState.isLoadingMore || !loadedState.hasMore) {
+                return false;
+              }
+              final metrics = notification.metrics;
+              final threshold = metrics.maxScrollExtent - 300;
+              if (metrics.pixels >= threshold) {
+                context.read<ProductsBloc>().add(const ProductsNextPageRequested());
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              slivers: [
+                _buildCategorySection(
+                  context: context,
+                  categories: categories,
+                  selectedCategoryId: selectedCategoryId,
                 ),
-              SliverToBoxAdapter(
-                child: SizedBox(height: 16.h),
-              ),
-            ],
+                if (loadedState != null)
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 0),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16.h,
+                        crossAxisSpacing: 12.w,
+                        childAspectRatio: 0.7,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final product = loadedState.products[index];
+                          return ProductGridCard(
+                            title: product.name,
+                            price: product.price,
+                            imagePath: product.photo,
+                            isFavorite: product.isFavorite,
+                            onFavoriteTap: () {},
+                            onTap: () => context.pushNamed(
+                              'product',
+                              pathParameters: {'id': product.id.toString()},
+                            ),
+                          );
+                        },
+                        childCount: loadedState.products.length,
+                      ),
+                    ),
+                  )
+                else
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 24.h),
+                        child: const CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+                if (loadedState?.isLoadingMore ?? false)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 16.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                  ),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: 16.h),
+                ),
+              ],
+            ),
           );
         },
       ),

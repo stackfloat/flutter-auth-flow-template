@@ -11,14 +11,31 @@ class ProductsPageData extends Equatable {
   final List<Category> categories;
   final List<ProductColor> colors;
   final List<ProductMaterial> materials;
+  final int currentPage;
+  final int lastPage;
+  final int total;
+  final int perPage;
 
   const ProductsPageData({
     required this.products,
     this.categories = const [],
     this.colors = const [],
     this.materials = const [],
+    this.currentPage = 1,
+    this.lastPage = 1,
+    this.total = 0,
+    this.perPage = 0,
   });
 
   @override
-  List<Object?> get props => [products, categories, colors, materials];
+  List<Object?> get props => [
+        products,
+        categories,
+        colors,
+        materials,
+        currentPage,
+        lastPage,
+        total,
+        perPage,
+      ];
 }

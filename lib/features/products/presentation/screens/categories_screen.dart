@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/entities/category_list_item.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -13,7 +17,29 @@ class CategoriesScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-          child: _CategoryListView(categories: _categories),
+          child: BlocBuilder<CategoriesBloc, CategoriesState>(
+            builder: (context, state) {
+              if (state is CategoriesLoading || state is CategoriesInitial) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is CategoriesFailure) {
+                return Center(
+                  child: Text(
+                    state.message,
+                    textAlign: TextAlign.center,
+                    style: context.typography.body,
+                  ),
+                );
+              }
+
+              if (state is CategoriesLoaded) {
+                return _CategoryListView(categories: state.categories);
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -21,7 +47,7 @@ class CategoriesScreen extends StatelessWidget {
 }
 
 class _CategoryListView extends StatelessWidget {
-  final List<_CategoryUiModel> categories;
+  final List<CategoryListItem> categories;
 
   const _CategoryListView({required this.categories});
 
@@ -39,7 +65,7 @@ class _CategoryListView extends StatelessWidget {
 }
 
 class _CategoryTile extends StatelessWidget {
-  final _CategoryUiModel category;
+  final CategoryListItem category;
 
   const _CategoryTile({required this.category});
 
@@ -59,11 +85,16 @@ class _CategoryTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.r),
-                child: Image.asset(
-                  category.imagePath,
+                child: Container(
                   width: 58.w,
                   height: 58.w,
-                  fit: BoxFit.cover,
+                  color: AppColors.border.withValues(alpha: 0.35),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.chair_alt_rounded,
+                    size: 28.sp,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -72,14 +103,14 @@ class _CategoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category.title,
+                      category.name,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '${category.itemCount} Items',
+                      '${category.productsCount} Items',
                       style: textTheme.bodyMedium?.copyWith(
                         color: AppColors.lightTextSecondary,
                         fontWeight: FontWeight.w500,
@@ -102,52 +133,3 @@ class _CategoryTile extends StatelessWidget {
   }
 }
 
-class _CategoryUiModel {
-  final String title;
-  final int itemCount;
-  final String imagePath;
-
-  const _CategoryUiModel({
-    required this.title,
-    required this.itemCount,
-    required this.imagePath,
-  });
-}
-
-const _categories = [
-  _CategoryUiModel(
-    title: 'Light',
-    itemCount: 2140,
-    imagePath: 'assets/images/categories/category_1.jpg',
-  ),
-  _CategoryUiModel(
-    title: 'Aram Chair',
-    itemCount: 1280,
-    imagePath: 'assets/images/categories/category_2.jpg',
-  ),
-  _CategoryUiModel(
-    title: 'Bedroom',
-    itemCount: 860,
-    imagePath: 'assets/images/categories/category_3.jpg',
-  ),
-  _CategoryUiModel(
-    title: 'Dressing Table',
-    itemCount: 2140,
-    imagePath: 'assets/images/categories/category_4.jpg',
-  ),
-  _CategoryUiModel(
-    title: 'Bedside Table',
-    itemCount: 470,
-    imagePath: 'assets/images/categories/category_5.jpg',
-  ),
-  _CategoryUiModel(
-    title: 'Sofa',
-    itemCount: 980,
-    imagePath: 'assets/images/categories/category_6.png',
-  ),
-  _CategoryUiModel(
-    title: 'Office Furnitures',
-    itemCount: 460,
-    imagePath: 'assets/images/categories/category_1.jpg',
-  ),
-];

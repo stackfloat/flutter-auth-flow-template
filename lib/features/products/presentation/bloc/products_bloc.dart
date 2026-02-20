@@ -18,6 +18,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<ProductCategoryChanged>(_onProductCategoryChanged);
     on<ProductFiltersUpdated>(_onProductFiltersUpdated);
     on<ProductFiltersApplied>(_onProductFiltersApplied);
+    on<ProductsNextPageRequested>(_onProductsNextPageRequested);
   }
 
   Future<void> _onProductCategoryChanged(
@@ -86,6 +87,21 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     );
   }
 
+  void _onProductsNextPageRequested(
+    ProductsNextPageRequested event,
+    Emitter<ProductsState> emit,
+  ) {
+    if (state is! ProductsLoaded) return;
+    final current = state as ProductsLoaded;
+    if (current.isLoadingMore || !current.hasMore) return;
+    add(
+      GetProductsEvent(
+        page: current.currentPage + 1,
+        isInitialLoad: false,
+      ),
+    );
+  }
+
   Future<void> _onGetProducts(
       GetProductsEvent event, Emitter<ProductsState> emit) async {
     final previousLoadedState =
@@ -101,25 +117,34 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     final minPrice = event.minPrice ?? currentFilters.minPrice;
     final maxPrice = event.maxPrice ?? currentFilters.maxPrice;
     final search = event.search ?? '';
+    final isLoadMore = event.page > 1 && previousLoadedState != null;
 
-    emit(
-      ProductsLoading(
-        categories: previousLoadedState?.categories ??
-            previousLoadingState?.categories ??
-            const [],
-        colors:
-            previousLoadedState?.colors ?? previousLoadingState?.colors ?? const [],
-        materials: previousLoadedState?.materials ??
-            previousLoadingState?.materials ??
-            const [],
-        selectedCategoryId: selectedCategoryId,
-        selectedMaterialId: selectedMaterialId,
-        selectedColorId: selectedColorId,
-        selectedSortBy: selectedSortBy,
-        minPrice: minPrice,
-        maxPrice: maxPrice,
-      ),
-    );
+    if (isLoadMore) {
+      if (previousLoadedState.isLoadingMore || !previousLoadedState.hasMore) {
+        return;
+      }
+      emit(previousLoadedState.copyWith(isLoadingMore: true));
+    } else {
+      emit(
+        ProductsLoading(
+          categories: previousLoadedState?.categories ??
+              previousLoadingState?.categories ??
+              const [],
+          colors:
+              previousLoadedState?.colors ?? previousLoadingState?.colors ?? const [],
+          materials: previousLoadedState?.materials ??
+              previousLoadingState?.materials ??
+              const [],
+          selectedCategoryId: selectedCategoryId,
+          selectedMaterialId: selectedMaterialId,
+          selectedColorId: selectedColorId,
+          selectedSortBy: selectedSortBy,
+          minPrice: minPrice,
+          maxPrice: maxPrice,
+        ),
+      );
+    }
+
     final result = await getProductsUseCase(
       GetProductsParams(
         categoryId: selectedCategoryId,
@@ -134,10 +159,18 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       ),
     );
     result.fold(
-      (failure) => emit(ProductsLoadingFailure(
-          message: failure.message ?? 'An unknown error occurred')),
+      (failure) {
+        if (isLoadMore) {
+          emit(previousLoadedState.copyWith(isLoadingMore: false));
+          return;
+        }
+        emit(ProductsLoadingFailure(
+            message: failure.message ?? 'An unknown error occurred'));
+      },
       (data) => emit(ProductsLoaded(
-        products: data.products,
+        products: isLoadMore
+            ? [...previousLoadedState.products, ...data.products]
+            : data.products,
         categories: event.isInitialLoad || data.categories.isNotEmpty
             ? data.categories
             : (previousLoadedState?.categories ??
@@ -153,6 +186,12 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
             : (previousLoadedState?.materials ??
                 previousLoadingState?.materials ??
                 const []),
+        currentPage: data.currentPage,
+        lastPage: data.lastPage,
+        total: data.total,
+        perPage: data.perPage,
+        isLoadingMore: false,
+        hasMore: data.currentPage < data.lastPage,
         selectedCategoryId: selectedCategoryId,
         selectedMaterialId: selectedMaterialId,
         selectedColorId: selectedColorId,
