@@ -129,11 +129,19 @@ GoRouter createRouter({
               GoRoute(
                 path: '/products',
                 name: 'products',
-                builder: (_, _) => BlocProvider(
-                  create: (_) =>
-                      sl<ProductsBloc>()..add(const GetProductsEvent(isInitialLoad: true)),
-                  child: const ProductsScreen(),
-                ),
+                builder: (_, state) {
+                  final categoryId = state.uri.queryParameters['category_id'] ?? '';
+                  return BlocProvider(
+                    create: (_) => sl<ProductsBloc>()
+                      ..add(
+                        GetProductsEvent(
+                          isInitialLoad: true,
+                          categoryId: categoryId,
+                        ),
+                      ),
+                    child: const ProductsScreen(),
+                  );
+                },
               ),
             ],
           ),

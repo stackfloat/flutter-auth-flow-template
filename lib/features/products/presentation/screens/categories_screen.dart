@@ -5,6 +5,7 @@ import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/category_list_item.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -58,7 +59,13 @@ class _CategoryListView extends StatelessWidget {
       separatorBuilder: (_, _) => SizedBox(height: 14.h),
       itemBuilder: (context, index) {
         final category = categories[index];
-        return _CategoryTile(category: category);
+        return _CategoryTile(
+          category: category,
+          onTap: () => context.goNamed(
+            'products',
+            queryParameters: {'category_id': category.id.toString()},
+          ),
+        );
       },
     );
   }
@@ -66,8 +73,12 @@ class _CategoryListView extends StatelessWidget {
 
 class _CategoryTile extends StatelessWidget {
   final CategoryListItem category;
+  final VoidCallback onTap;
 
-  const _CategoryTile({required this.category});
+  const _CategoryTile({
+    required this.category,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +88,7 @@ class _CategoryTile extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12.r),
         child: Padding(
           padding: EdgeInsets.all(14.w),
