@@ -61,8 +61,8 @@ class _CategoryListView extends StatelessWidget {
         final category = categories[index];
         return _CategoryTile(
           category: category,
-          onTap: () => context.goNamed(
-            'products',
+          onTap: () => context.pushNamed(
+            'products-preview',
             queryParameters: {'category_id': category.id.toString()},
           ),
         );
@@ -143,4 +143,3 @@ class _CategoryTile extends StatelessWidget {
     );
   }
 }
-

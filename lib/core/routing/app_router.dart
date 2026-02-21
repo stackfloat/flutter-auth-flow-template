@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/main_scaffold.dart';
 import 'package:furniture_ecommerce_app/core/routing/go_router_refresh_stream.dart';
@@ -30,6 +31,20 @@ GoRouter createRouter({
   required AuthBloc authBloc,
   required String initialLocation,
 }) {
+  Widget buildProductsScreen(GoRouterState state) {
+    final categoryId = state.uri.queryParameters['category_id'] ?? '';
+    return BlocProvider(
+      create: (_) => sl<ProductsBloc>()
+        ..add(
+          GetProductsEvent(
+            isInitialLoad: true,
+            categoryId: categoryId,
+          ),
+        ),
+      child: const ProductsScreen(),
+    );
+  }
+
   return GoRouter(
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     initialLocation: initialLocation,
@@ -89,6 +104,16 @@ GoRouter createRouter({
           return ProductScreen(productId: id);
         },
       ),
+      GoRoute(
+        path: '/products-preview',
+        name: 'products-preview',
+        builder: (_, state) => buildProductsScreen(state),
+      ),
+      GoRoute(
+        path: '/cart-preview',
+        name: 'cart-preview',
+        builder: (_, _) => const CartScreen(),
+      ),
 
       GoRoute(
         path: '/checkout/choose-address',
@@ -129,19 +154,7 @@ GoRouter createRouter({
               GoRoute(
                 path: '/products',
                 name: 'products',
-                builder: (_, state) {
-                  final categoryId = state.uri.queryParameters['category_id'] ?? '';
-                  return BlocProvider(
-                    create: (_) => sl<ProductsBloc>()
-                      ..add(
-                        GetProductsEvent(
-                          isInitialLoad: true,
-                          categoryId: categoryId,
-                        ),
-                      ),
-                    child: const ProductsScreen(),
-                  );
-                },
+                builder: (_, state) => buildProductsScreen(state),
               ),
             ],
           ),

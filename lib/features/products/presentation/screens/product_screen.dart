@@ -349,7 +349,7 @@ class _BottomActionBarState extends State<_BottomActionBar> {
               child: SizedBox(
                 height: 50.h,
                 child: ElevatedButton.icon(
-                  onPressed: () => context.goNamed('cart'),
+                  onPressed: () => context.pushNamed('cart-preview'),
                   icon: Icon(Icons.shopping_cart_outlined, size: 20.sp),
                   label: Text(
                     'Add to Cart',
