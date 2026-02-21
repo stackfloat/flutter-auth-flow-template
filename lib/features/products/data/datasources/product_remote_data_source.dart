@@ -34,7 +34,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           throw FormatException(
               'Expected object response, got: ${data.runtimeType}');
         }
-        return ProductsResponseModel.fromApiJson(data);
+        final payload = data['data'] is Map<String, dynamic>
+            ? data['data'] as Map<String, dynamic>
+            : data;
+        return ProductsResponseModel.fromApiJson(payload);
       },
     );
   }
@@ -49,12 +52,12 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
               'Expected object response, got: ${data.runtimeType}');
         }
 
-        final categoriesSection = data['categories'];
-        if (categoriesSection is! Map<String, dynamic>) {
-          return <CategoryListItemModel>[];
-        }
-
-        final categoriesData = categoriesSection['data'];
+        final outerData = data['data'];
+        final categoriesData = outerData is Map<String, dynamic>
+            ? outerData['categories']
+            : ((data['categories'] is Map<String, dynamic>)
+                  ? (data['categories'] as Map<String, dynamic>)['data']
+                  : null);
         if (categoriesData is! List) {
           return <CategoryListItemModel>[];
         }

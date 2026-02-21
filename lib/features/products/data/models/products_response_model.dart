@@ -3,10 +3,6 @@ import 'package:furniture_ecommerce_app/features/products/data/models/color_mode
 import 'package:furniture_ecommerce_app/features/products/data/models/material_model.dart';
 import 'package:furniture_ecommerce_app/features/products/data/models/product_model.dart';
 
-/// Parses the API response for /products.
-/// Handles both shapes:
-/// - Initial: products + categories + colors + materials
-/// - Pagination: products only
 class ProductsResponseModel {
   final List<ProductModel> products;
   final List<CategoryModel> categories;
@@ -53,11 +49,13 @@ class ProductsResponseModel {
     T Function(Map<String, dynamic>) fromJson,
   ) {
     final section = json[key];
-    if (section is! Map) return [];
-    final data = section['data'];
+    final data = section is List
+        ? section
+        : (section is Map ? section['data'] : null);
     if (data is! List) return [];
     return data
-        .map((e) => fromJson(e as Map<String, dynamic>))
+        .whereType<Map<String, dynamic>>()
+        .map(fromJson)
         .toList();
   }
 
