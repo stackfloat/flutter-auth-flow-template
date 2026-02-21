@@ -18,8 +18,10 @@ import 'package:furniture_ecommerce_app/features/products/data/datasources/produ
 import 'package:furniture_ecommerce_app/features/products/data/repositories/product_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_categories_use_case.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_product_details_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
@@ -166,6 +168,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<GetCategoriesUseCase>(
     () => GetCategoriesUseCase(sl<ProductRepository>()),
   );
+  sl.registerLazySingleton<GetProductDetailsUseCase>(
+    () => GetProductDetailsUseCase(sl<ProductRepository>()),
+  );
 
   // Blocs
   sl.registerFactory<ProductsBloc>(
@@ -173,6 +178,9 @@ Future<void> initDependencies() async {
   );
   sl.registerFactory<CategoriesBloc>(
     () => CategoriesBloc(sl<GetCategoriesUseCase>()),
+  );
+  sl.registerFactory<ProductDetailsBloc>(
+    () => ProductDetailsBloc(sl<GetProductDetailsUseCase>()),
   );
 
   // ---------------------------------------------------------------------------

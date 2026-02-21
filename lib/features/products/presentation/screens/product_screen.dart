@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/entities/color.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/entities/product_details.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 
 class ProductScreen extends StatelessWidget {
   final String productId;
@@ -11,95 +15,125 @@ class ProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _ProductHero(
-                    imagePath: 'assets/images/products/product_6.png',
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Casey 1 seater Manual Recliner in Brown Colour',
-                          style: TextStyle(
-                            fontSize: 26.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.lightText,
-                            height: 1.15,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          '\$49.00',
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.lightText,
-                          ),
-                        ),
-                        SizedBox(height: 14.h),
-                        Divider(color: Colors.black12, height: 1.h),
-                        SizedBox(height: 14.h),
-                        Text(
-                          'Colors',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.lightText,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        const _ColorOptionsRow(),
-                        SizedBox(height: 14.h),
-                        Divider(color: Colors.black12, height: 1.h),
-                        SizedBox(height: 14.h),
-                        Text(
-                          'Description',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.lightText,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'Design is an evolutionary process, and filler text is just one tool in your progress-pushing arsenal. Relax and do whatever fits with your design process. Don\'t set a lot of restrictive hard-and-fast rules distract designers and design.',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.lightTextSecondary,
-                            height: 1.5,
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        _InfoRow(
-                          label: 'Categories',
-                          value: 'Furnitures, Accessories',
-                        ),
-                        SizedBox(height: 8.h),
-                        _InfoRow(
-                          label: 'Tags',
-                          value: '#Furnitures, #Chair, #Table',
-                        ),
-                        SizedBox(height: 24.h),
-                      ],
-                    ),
-                  ),
-                ],
+      body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
+        builder: (context, state) {
+          if (state is ProductDetailsLoading || state is ProductDetailsInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is ProductDetailsFailure) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-          ),
-          const _BottomActionBar(),
-        ],
+            );
+          }
+
+          final product = (state as ProductDetailsLoaded).product;
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ProductHero(imagePath: product.photo),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              product.name,
+                              style: TextStyle(
+                                fontSize: 26.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.lightText,
+                                height: 1.15,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              '\$${product.price.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.lightText,
+                              ),
+                            ),
+                            SizedBox(height: 14.h),
+                            Divider(color: Colors.black12, height: 1.h),
+                            SizedBox(height: 14.h),
+                            Text(
+                              'Colors',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.lightText,
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            _ColorOptionsRow(colors: product.colors),
+                            SizedBox(height: 14.h),
+                            Divider(color: Colors.black12, height: 1.h),
+                            SizedBox(height: 14.h),
+                            Text(
+                              'Description',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.lightText,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              product.description.isEmpty
+                                  ? 'No description available.'
+                                  : product.description,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.lightTextSecondary,
+                                height: 1.5,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            _InfoRow(
+                              label: 'Categories',
+                              value: _joinCategoryNames(product),
+                            ),
+                            SizedBox(height: 8.h),
+                            _InfoRow(
+                              label: 'Materials',
+                              value: _joinMaterialNames(product),
+                            ),
+                            SizedBox(height: 24.h),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const _BottomActionBar(),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  String _joinCategoryNames(ProductDetails product) {
+    if (product.categories.isEmpty) return '-';
+    return product.categories.map((e) => e.name).join(', ');
+  }
+
+  String _joinMaterialNames(ProductDetails product) {
+    if (product.materials.isEmpty) return '-';
+    return product.materials.map((e) => e.name).join(', ');
   }
 }
 
@@ -115,19 +149,23 @@ class _ProductHero extends StatelessWidget {
     return SizedBox(
       height: 440.h,
       width: double.infinity,
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(20.r),
-          bottomRight: Radius.circular(20.r),
-        ),
+      child: ClipRRect(        
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
+            Image.network(
               imagePath,
-              fit: BoxFit.fitWidth,
-              alignment: Alignment.topCenter,
-              filterQuality: FilterQuality.high,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey.shade200,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  size: 48.sp,
+                  color: Colors.black45,
+                ),
+              ),
             ),
             Positioned.fill(
               child: DecoratedBox(
@@ -185,39 +223,54 @@ class _ProductHero extends StatelessWidget {
 }
 
 class _ColorOptionsRow extends StatelessWidget {
-  const _ColorOptionsRow();
+  final List<ProductColor> colors;
+
+  const _ColorOptionsRow({required this.colors});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _ColorDot(color: const Color(0xFF805A50)),
-        SizedBox(width: 12.w),
-        _ColorDot(color: const Color(0xFF304A9E)),
-        SizedBox(width: 12.w),
-        _ColorDot(
-          color: Colors.white,
-          borderColor: const Color(0xFFCD8F48),
-          borderWidth: 2,
+    if (colors.isEmpty) {
+      return Text(
+        'No colors available',
+        style: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.lightTextSecondary,
         ),
-        SizedBox(width: 12.w),
-        _ColorDot(color: const Color(0xFFE5E8EA)),
-        SizedBox(width: 12.w),
-        _ColorDot(color: const Color(0xFF022D40)),
-      ],
+      );
+    }
+
+    return Wrap(
+      spacing: 12.w,
+      runSpacing: 8.h,
+      children: colors
+          .map((color) => _ColorDot(color: _parseHexColor(color.colorCode)))
+          .toList(),
     );
   }
 }
 
+Color _parseHexColor(String hexCode) {
+  final sanitized = hexCode.replaceFirst('#', '').trim();
+  if (sanitized.isEmpty) return Colors.black12;
+  try {
+    if (sanitized.length == 6) {
+      return Color(int.parse('FF$sanitized', radix: 16));
+    }
+    if (sanitized.length == 8) {
+      return Color(int.parse(sanitized, radix: 16));
+    }
+  } on FormatException {
+    return Colors.black12;
+  }
+  return Colors.black12;
+}
+
 class _ColorDot extends StatelessWidget {
   final Color color;
-  final Color? borderColor;
-  final double borderWidth;
 
   const _ColorDot({
     required this.color,
-    this.borderColor,
-    this.borderWidth = 0,
   });
 
   @override
@@ -228,9 +281,6 @@ class _ColorDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: borderColor == null
-            ? null
-            : Border.all(color: borderColor!, width: borderWidth),
       ),
     );
   }

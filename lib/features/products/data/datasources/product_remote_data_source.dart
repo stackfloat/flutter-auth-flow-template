@@ -1,12 +1,14 @@
 import 'package:furniture_ecommerce_app/core/services/network/dio_client.dart';
 import 'package:furniture_ecommerce_app/core/utils/typedef.dart';
 import 'package:furniture_ecommerce_app/features/products/data/models/category_list_item_model.dart';
+import 'package:furniture_ecommerce_app/features/products/data/models/product_details_model.dart';
 import 'package:furniture_ecommerce_app/features/products/data/models/products_response_model.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_params.dart';
 
 abstract class ProductRemoteDataSource {
   ResultFuture<ProductsResponseModel> getProducts(GetProductsParams params);
   ResultFuture<List<CategoryListItemModel>> getCategories();
+  ResultFuture<ProductDetailsModel> getProductDetails(int productId);
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -65,6 +67,31 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         return categoriesData
             .map((e) => CategoryListItemModel.fromApiJson(e as Map<String, dynamic>))
             .toList();
+      },
+    );
+  }
+
+  @override
+  ResultFuture<ProductDetailsModel> getProductDetails(int productId) {
+    return _dioClient.get<ProductDetailsModel>(
+      '/products/$productId',
+      parser: (data) {
+        if (data is! Map<String, dynamic>) {
+          throw FormatException(
+              'Expected object response, got: ${data.runtimeType}');
+        }
+
+        final payload = data['data'];
+        if (payload is! Map<String, dynamic>) {
+          throw const FormatException('Expected "data" object in response');
+        }
+
+        final productData = payload['product'];
+        if (productData is! Map<String, dynamic>) {
+          throw const FormatException('Expected "product" object in response');
+        }
+
+        return ProductDetailsModel.fromApiJson(productData);
       },
     );
   }

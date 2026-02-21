@@ -19,6 +19,7 @@ import 'package:furniture_ecommerce_app/features/products/presentation/screens/c
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/product_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/products_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
+import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:furniture_ecommerce_app/features/search/presentation/screens/search_screen.dart';
@@ -100,8 +101,13 @@ GoRouter createRouter({
         path: '/product/:id',
         name: 'product',
         builder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return ProductScreen(productId: id);
+          final rawId = state.pathParameters['id'] ?? '';
+          final productId = int.tryParse(rawId) ?? 0;
+          return BlocProvider(
+            create: (_) => sl<ProductDetailsBloc>()
+              ..add(GetProductDetailsEvent(productId: productId)),
+            child: ProductScreen(productId: rawId),
+          );
         },
       ),
       GoRoute(
