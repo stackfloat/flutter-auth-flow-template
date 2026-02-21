@@ -17,37 +17,26 @@ class ProductsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: AppColors.lightBackground,
-        elevation: 0,
-        title: Text(
-          'Products',
-          style: context.typography.pageTitle,
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => _openFilters(context),
-            icon: Icon(
-              Icons.tune_rounded,
-              size: 24.sp,
-              color: AppColors.lightText,
-            ),
-          ),
-        ],
-      ),
       body: BlocBuilder<ProductsBloc, ProductsState>(
         builder: (context, state) {
           if (state is ProductsLoadingFailure) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Text(
-                  state.message,
-                  textAlign: TextAlign.center,
-                  style: context.typography.body,
+            return CustomScrollView(
+              slivers: [
+                _buildSliverAppBar(context),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: context.typography.body,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             );
           }
 
@@ -78,6 +67,7 @@ class ProductsScreen extends StatelessWidget {
             },
             child: CustomScrollView(
               slivers: [
+                _buildSliverAppBar(context),
                 _buildCategorySection(
                   context: context,
                   categories: categories,
@@ -137,6 +127,33 @@ class ProductsScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  SliverAppBar _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      floating: true,
+      snap: true,
+      pinned: false,
+      centerTitle: true,
+      backgroundColor: AppColors.lightBackground,
+      surfaceTintColor: AppColors.lightBackground,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      title: Text(
+        'Products',
+        style: context.typography.pageTitle,
+      ),
+      actions: [
+        IconButton(
+          onPressed: () => _openFilters(context),
+          icon: Icon(
+            Icons.tune_rounded,
+            size: 24.sp,
+            color: AppColors.lightText,
+          ),
+        ),
+      ],
     );
   }
 
