@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:furniture_ecommerce_app/core/entities/product.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/color.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/material.dart';
-import 'package:furniture_ecommerce_app/features/products/domain/entities/product.dart';
 
 /// Domain entity holding products with filter options (categories, colors, materials).
 /// Used for initial load (all data) and pagination (products only).

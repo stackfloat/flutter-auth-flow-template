@@ -15,3 +15,12 @@ final class GetProductDetailsEvent extends ProductDetailsEvent {
   @override
   List<Object?> get props => [productId];
 }
+
+final class ProductDetailsQuantityChanged extends ProductDetailsEvent {
+  final int quantity;
+
+  const ProductDetailsQuantityChanged({required this.quantity});
+
+  @override
+  List<Object?> get props => [quantity];
+}

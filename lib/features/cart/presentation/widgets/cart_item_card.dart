@@ -6,7 +6,7 @@ import 'package:furniture_ecommerce_app/features/cart/presentation/widgets/quant
 class CartItemCard extends StatelessWidget {
   final String title;
   final double price;
-  final int quantity;
+   final int quantity;
   final String imagePath;
   final VoidCallback onDelete;
   final VoidCallback onDecrease;
@@ -35,11 +35,22 @@ class CartItemCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(6.r),
-            child: Image.asset(
+            child: Image.network(
               imagePath,
               width: 58.w,
               height: 58.w,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 58.w,
+                height: 58.w,
+                color: Colors.grey.shade200,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  size: 16.sp,
+                  color: Colors.black45,
+                ),
+              ),
             ),
           ),
           SizedBox(width: 10.w),

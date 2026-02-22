@@ -1,49 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/cart/domain/entities/cart_data.dart';
+import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/widgets/cart_summary_section.dart';
 import 'package:go_router/go_router.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
-
-  @override
-  State<CartScreen> createState() => _CartScreenState();
-}
-
-class _CartScreenState extends State<CartScreen> {
-  List<_CartItemUiModel> _items = const [
-    _CartItemUiModel(
-      id: '1',
-      title: 'Atelier Ottoman Takumi Series',
-      price: 39.70,
-      colorName: 'Green',
-      color: Color(0xFF1C5C4A),
-      quantity: 1,
-      imagePath: 'assets/images/products/product_5.jpeg',
-    ),
-    _CartItemUiModel(
-      id: '3',
-      title: 'Chair Side End Table',
-      price: 48.40,
-      colorName: 'Grey',
-      color: Color(0xFF707070),
-      quantity: 1,
-      imagePath: 'assets/images/products/product_2.jpg',
-    ),
-  ];
-
+  
   @override
   Widget build(BuildContext context) {
-    final subtotal = _items.fold<double>(
-      0,
-      (sum, item) => sum + (item.price * item.quantity),
-    );
-    const shippingFee = 9.90;
-    const estimateTax = 6.50;
-    final total = subtotal + shippingFee + estimateTax;
-
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
@@ -54,88 +23,97 @@ class _CartScreenState extends State<CartScreen> {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
-              itemCount: _items.length,
-              separatorBuilder: (_, _) => SizedBox(height: 12.h),
-              itemBuilder: (context, index) {
-                final item = _items[index];
-                return CartItemCard(
-                  title: item.title,
-                  price: item.price,
-                  quantity: item.quantity,
-                  imagePath: item.imagePath,
-                  onDelete: () => _removeItem(item.id),
-                  onDecrease: () => _updateQuantity(item.id, item.quantity - 1),
-                  onIncrease: () => _updateQuantity(item.id, item.quantity + 1),
-                );
-              },
-            ),
-          ),
-          CartSummarySection(
-            subtotal: subtotal,
-            shippingFee: shippingFee,
-            estimateTax: estimateTax,
-            total: total,
-            onCheckout: () {
-                context.pushNamed('choose-address');
-            },
-          ),
-        ],
+      body: BlocBuilder<CartBloc, CartState>(
+        builder: (context, state) {
+          final cartData = _resolveData(state);
+          final items = cartData.items;
+          final isInitialLoading =
+              state is CartLoading && state.previousData.items.isEmpty;
+
+          if (isInitialLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is CartLoadingFailure && items.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          return Column(
+            children: [
+              Expanded(
+                child: items.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Your cart is empty',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
+                        itemCount: items.length,
+                        separatorBuilder: (_, _) => SizedBox(height: 12.h),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return CartItemCard(
+                            title: item.product.name,
+                            price: item.product.price,
+                            quantity: item.quantity,
+                            imagePath: item.product.photo,
+                            onDelete: () => context.read<CartBloc>().add(
+                              RemoveCartItemEvent(cartItemId: item.id),
+                            ),
+                            onDecrease: () {
+                              if (item.quantity <= 1) return;
+                              context.read<CartBloc>().add(
+                                UpdateCartItemEvent(
+                                  cartItemId: item.id,
+                                  quantity: item.quantity - 1,
+                                ),
+                              );
+                            },
+                            onIncrease: () => context.read<CartBloc>().add(
+                              UpdateCartItemEvent(
+                                cartItemId: item.id,
+                                quantity: item.quantity + 1,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              CartSummarySection(
+                subTotal: cartData.subTotal,
+                shippingFee: cartData.shippingFee,
+                total: cartData.totalPrice,
+                onCheckout: () {
+                  context.pushNamed('choose-address');
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  void _removeItem(String itemId) {
-    setState(() {
-      _items = _items.where((item) => item.id != itemId).toList();
-    });
-  }
-
-  void _updateQuantity(String itemId, int quantity) {
-    if (quantity < 1) return;
-    setState(() {
-      _items = _items
-          .map(
-            (item) =>
-                item.id == itemId ? item.copyWith(quantity: quantity) : item,
-          )
-          .toList();
-    });
-  }
-}
-
-class _CartItemUiModel {
-  final String id;
-  final String title;
-  final double price;
-  final String colorName;
-  final Color color;
-  final int quantity;
-  final String imagePath;
-
-  const _CartItemUiModel({
-    required this.id,
-    required this.title,
-    required this.price,
-    required this.colorName,
-    required this.color,
-    required this.quantity,
-    required this.imagePath,
-  });
-
-  _CartItemUiModel copyWith({int? quantity}) {
-    return _CartItemUiModel(
-      id: id,
-      title: title,
-      price: price,
-      colorName: colorName,
-      color: color,
-      quantity: quantity ?? this.quantity,
-      imagePath: imagePath,
-    );
+  CartData _resolveData(CartState state) {
+    if (state is CartLoaded) return state.data;
+    if (state is CartLoading) return state.previousData;
+    if (state is CartLoadingFailure) return state.previousData;
+    if (state is CartAddToCartInProgress) return state.previousData;
+    if (state is CartAddToCartSuccess) return state.previousData;
+    if (state is CartAddToCartFailure) return state.previousData;
+    return const CartData();
   }
 }

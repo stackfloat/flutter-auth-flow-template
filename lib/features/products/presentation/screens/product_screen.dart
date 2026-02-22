@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/color.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/product_details.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
@@ -13,115 +14,130 @@ class ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.lightBackground,
-      body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
-        builder: (context, state) {
-          if (state is ProductDetailsLoading || state is ProductDetailsInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is ProductDetailsFailure) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Text(
-                  state.message,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
-
-          final product = (state as ProductDetailsLoaded).product;
-          return Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _ProductHero(imagePath: product.photo),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.name,
-                              style: TextStyle(
-                                fontSize: 26.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.lightText,
-                                height: 1.15,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              '\$${product.price.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 24.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.lightText,
-                              ),
-                            ),
-                            SizedBox(height: 14.h),
-                            Divider(color: Colors.black12, height: 1.h),
-                            SizedBox(height: 14.h),
-                            Text(
-                              'Colors',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.lightText,
-                              ),
-                            ),
-                            SizedBox(height: 12.h),
-                            _ColorOptionsRow(colors: product.colors),
-                            SizedBox(height: 14.h),
-                            Divider(color: Colors.black12, height: 1.h),
-                            SizedBox(height: 14.h),
-                            Text(
-                              'Description',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.lightText,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              product.description.isEmpty
-                                  ? 'No description available.'
-                                  : product.description,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.lightTextSecondary,
-                                height: 1.5,
-                              ),
-                            ),
-                            SizedBox(height: 16.h),
-                            _InfoRow(
-                              label: 'Categories',
-                              value: _joinCategoryNames(product),
-                            ),
-                            SizedBox(height: 8.h),
-                            _InfoRow(
-                              label: 'Materials',
-                              value: _joinMaterialNames(product),
-                            ),
-                            SizedBox(height: 24.h),
-                          ],
-                        ),
-                      ),
-                    ],
+    return BlocListener<CartBloc, CartState>(
+      listener: (context, state) {
+        if (state is CartAddToCartSuccess) {
+          context.pushNamed('cart-preview');
+        } else if (state is CartAddToCartFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.lightBackground,
+        body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
+          builder: (context, state) {
+            if (state is ProductDetailsLoading || state is ProductDetailsInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is ProductDetailsFailure) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Text(
+                    state.message,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ),
-              const _BottomActionBar(),
-            ],
-          );
-        },
+              );
+            }
+
+            final product = (state as ProductDetailsLoaded).product;
+            final selectedQuantity = state.selectedQuantity;
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _ProductHero(imagePath: product.photo),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.name,
+                                style: TextStyle(
+                                  fontSize: 26.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.lightText,
+                                  height: 1.15,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                '\$${product.price.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 24.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.lightText,
+                                ),
+                              ),
+                              SizedBox(height: 14.h),
+                              Divider(color: Colors.black12, height: 1.h),
+                              SizedBox(height: 14.h),
+                              Text(
+                                'Colors',
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.lightText,
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                              _ColorOptionsRow(colors: product.colors),
+                              SizedBox(height: 14.h),
+                              Divider(color: Colors.black12, height: 1.h),
+                              SizedBox(height: 14.h),
+                              Text(
+                                'Description',
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.lightText,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                product.description.isEmpty
+                                    ? 'No description available.'
+                                    : product.description,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.lightTextSecondary,
+                                  height: 1.5,
+                                ),
+                              ),
+                              SizedBox(height: 16.h),
+                              _InfoRow(
+                                label: 'Categories',
+                                value: _joinCategoryNames(product),
+                              ),
+                              SizedBox(height: 8.h),
+                              _InfoRow(
+                                label: 'Materials',
+                                value: _joinMaterialNames(product),
+                              ),
+                              SizedBox(height: 24.h),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                _BottomActionBar(
+                  productId: product.id,
+                  selectedQuantity: selectedQuantity,
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -332,15 +348,14 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _BottomActionBar extends StatefulWidget {
-  const _BottomActionBar();
+class _BottomActionBar extends StatelessWidget {
+  final int productId;
+  final int selectedQuantity;
 
-  @override
-  State<_BottomActionBar> createState() => _BottomActionBarState();
-}
-
-class _BottomActionBarState extends State<_BottomActionBar> {
-  int _selectedQuantity = 1;
+  const _BottomActionBar({
+    required this.productId,
+    required this.selectedQuantity,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -360,10 +375,12 @@ class _BottomActionBarState extends State<_BottomActionBar> {
               ),
               child: PopupMenuButton<int>(
                 tooltip: '',
-                initialValue: _selectedQuantity,
+                initialValue: selectedQuantity,
                 padding: EdgeInsets.zero,
                 position: PopupMenuPosition.under,
-                onSelected: (value) => setState(() => _selectedQuantity = value),
+                onSelected: (value) => context.read<ProductDetailsBloc>().add(
+                  ProductDetailsQuantityChanged(quantity: value),
+                ),
                 itemBuilder: (context) => const [
                   PopupMenuItem(value: 1, child: Text('01')),
                   PopupMenuItem(value: 2, child: Text('02')),
@@ -375,7 +392,7 @@ class _BottomActionBarState extends State<_BottomActionBar> {
                   alignment: Alignment.center,
                   children: [
                     Text(
-                      _selectedQuantity.toString().padLeft(2, '0'),
+                      selectedQuantity.toString().padLeft(2, '0'),
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -396,26 +413,51 @@ class _BottomActionBarState extends State<_BottomActionBar> {
             ),
             SizedBox(width: 12.w),
             Expanded(
-              child: SizedBox(
-                height: 50.h,
-                child: ElevatedButton.icon(
-                  onPressed: () => context.pushNamed('cart-preview'),
-                  icon: Icon(Icons.shopping_cart_outlined, size: 20.sp),
-                  label: Text(
-                    'Add to Cart',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
+              child: BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  final isAdding = state is CartAddToCartInProgress;
+                  return SizedBox(
+                    height: 50.h,
+                    child: ElevatedButton.icon(
+                      onPressed: isAdding
+                          ? null
+                          : () {
+                              context.read<CartBloc>().add(
+                                AddToCartEvent(
+                                  productId: productId,
+                                  quantity: selectedQuantity,
+                                ),
+                              );
+                            },
+                      icon: isAdding
+                          ? SizedBox(
+                              width: 18.w,
+                              height: 18.w,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Icon(Icons.shopping_cart_outlined, size: 20.sp),
+                      label: Text(
+                        isAdding ? 'Adding...' : 'Add to Cart',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.black87,
+                        disabledForegroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],

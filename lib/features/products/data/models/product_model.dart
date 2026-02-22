@@ -1,4 +1,4 @@
-import 'package:furniture_ecommerce_app/features/products/domain/entities/product.dart';
+import 'package:furniture_ecommerce_app/core/entities/product.dart';
 
 class ProductModel extends Product {
   const ProductModel({

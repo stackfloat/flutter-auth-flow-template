@@ -12,6 +12,7 @@ class ProductDetailsBloc extends Bloc<ProductDetailsEvent, ProductDetailsState> 
   ProductDetailsBloc(this.getProductDetailsUseCase)
       : super(ProductDetailsInitial()) {
     on<GetProductDetailsEvent>(_onGetProductDetails);
+    on<ProductDetailsQuantityChanged>(_onProductDetailsQuantityChanged);
   }
 
   Future<void> _onGetProductDetails(
@@ -26,7 +27,17 @@ class ProductDetailsBloc extends Bloc<ProductDetailsEvent, ProductDetailsState> 
           message: failure.message ?? 'Failed to load product details',
         ),
       ),
-      (product) => emit(ProductDetailsLoaded(product: product)),
+      (product) => emit(ProductDetailsLoaded(product: product, selectedQuantity: 1)),
     );
+  }
+
+  void _onProductDetailsQuantityChanged(
+    ProductDetailsQuantityChanged event,
+    Emitter<ProductDetailsState> emit,
+  ) {
+    if (state is! ProductDetailsLoaded) return;
+    if (event.quantity < 1) return;
+    final current = state as ProductDetailsLoaded;
+    emit(current.copyWith(selectedQuantity: event.quantity));
   }
 }

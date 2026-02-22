@@ -13,11 +13,25 @@ final class ProductDetailsLoading extends ProductDetailsState {}
 
 final class ProductDetailsLoaded extends ProductDetailsState {
   final ProductDetails product;
+  final int selectedQuantity;
 
-  const ProductDetailsLoaded({required this.product});
+  const ProductDetailsLoaded({
+    required this.product,
+    this.selectedQuantity = 1,
+  });
+
+  ProductDetailsLoaded copyWith({
+    ProductDetails? product,
+    int? selectedQuantity,
+  }) {
+    return ProductDetailsLoaded(
+      product: product ?? this.product,
+      selectedQuantity: selectedQuantity ?? this.selectedQuantity,
+    );
+  }
 
   @override
-  List<Object?> get props => [product];
+  List<Object?> get props => [product, selectedQuantity];
 }
 
 final class ProductDetailsFailure extends ProductDetailsState {

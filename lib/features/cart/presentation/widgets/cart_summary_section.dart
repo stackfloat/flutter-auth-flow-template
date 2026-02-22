@@ -3,17 +3,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 
 class CartSummarySection extends StatelessWidget {
-  final double subtotal;
+  final double subTotal;
   final double shippingFee;
-  final double estimateTax;
   final double total;
   final VoidCallback onCheckout;
 
   const CartSummarySection({
     super.key,
-    required this.subtotal,
+    required this.subTotal,
     required this.shippingFee,
-    required this.estimateTax,
     required this.total,
     required this.onCheckout,
   });
@@ -28,15 +26,20 @@ class CartSummarySection extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border(top: BorderSide(color: Colors.black12, width: 0.8)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SummaryRow(label: 'Sub Total', value: _currency(subtotal)),
+            _SummaryRow(label: 'Sub Total', value: _currency(subTotal)),
             SizedBox(height: 10.h),
             _SummaryRow(label: 'Shipping Fee', value: _currency(shippingFee)),
-            SizedBox(height: 10.h),
-            _SummaryRow(label: 'Estimating Tax', value: _currency(estimateTax)),
             SizedBox(height: 12.h),
             Divider(color: Colors.black26, height: 1.h),
             SizedBox(height: 12.h),

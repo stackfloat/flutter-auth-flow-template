@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:furniture_ecommerce_app/core/entities/product.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/color.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/material.dart';
-import 'package:furniture_ecommerce_app/features/products/domain/entities/product.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_params.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_use_case.dart';
 

@@ -16,6 +16,7 @@ import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_state.dart';
+import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:furniture_ecommerce_app/firebase_options.dart';
 import 'package:go_router/go_router.dart';
 
@@ -78,14 +79,21 @@ void main() {
           initialAuthState.status == AuthStatus.authenticated ? '/' : '/signin';
 
       runApp(
-        BlocProvider(
-          create: (_) => AuthBloc(
-            getCurrentUserUseCase,
-            sl<LogoutUseCase>(),
-            sl<ClearSessionUseCase>(),
-            authSessionNotifier,
-            initialState: initialAuthState,
-          ),
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => AuthBloc(
+                getCurrentUserUseCase,
+                sl<LogoutUseCase>(),
+                sl<ClearSessionUseCase>(),
+                authSessionNotifier,
+                initialState: initialAuthState,
+              ),
+            ),
+            BlocProvider(
+              create: (_) => sl<CartBloc>()..add(const GetCartEvent()),
+            ),
+          ],
           child: MainApp(initialLocation: initialLocation),
         ),
       );

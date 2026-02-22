@@ -14,6 +14,14 @@ import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_bloc.dart';
+import 'package:furniture_ecommerce_app/features/cart/data/datasources/cart_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/cart/data/repositories/cart_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/cart/domain/repositories/cart_repository.dart';
+import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/add_to_cart_use_case.dart';
+import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/get_cart_use_case.dart';
+import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/remove_cart_item_use_case.dart';
+import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/update_cart_item_use_case.dart';
+import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:furniture_ecommerce_app/features/home/data/datasources/home_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/home/data/repositories/home_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/home/domain/repositories/home_repository.dart';
@@ -148,6 +156,44 @@ Future<void> initDependencies() async {
 
   sl.registerFactory<SignupBloc>(
     () => SignupBloc(sl<SignupUseCase>()),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Features - Cart
+  // ---------------------------------------------------------------------------
+
+  // Data Sources
+  sl.registerLazySingleton<CartRemoteDataSource>(
+    () => CartRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<CartRepository>(
+    () => CartRepositoryImpl(sl<CartRemoteDataSource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<AddToCartUseCase>(
+    () => AddToCartUseCase(sl<CartRepository>()),
+  );
+  sl.registerLazySingleton<GetCartUseCase>(
+    () => GetCartUseCase(sl<CartRepository>()),
+  );
+  sl.registerLazySingleton<UpdateCartItemUseCase>(
+    () => UpdateCartItemUseCase(sl<CartRepository>()),
+  );
+  sl.registerLazySingleton<RemoveCartItemUseCase>(
+    () => RemoveCartItemUseCase(sl<CartRepository>()),
+  );
+
+  // Blocs
+  sl.registerFactory<CartBloc>(
+    () => CartBloc(
+      sl<AddToCartUseCase>(),
+      sl<GetCartUseCase>(),
+      sl<UpdateCartItemUseCase>(),
+      sl<RemoveCartItemUseCase>(),
+    ),
   );
 
   // ---------------------------------------------------------------------------
