@@ -23,7 +23,6 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
-import 'package:furniture_ecommerce_app/features/search/presentation/screens/search_screen.dart';
 import 'package:go_router/go_router.dart';
 
 // Define public routes (routes that don't require authentication)
@@ -181,17 +180,6 @@ GoRouter createRouter({
           ),
 
           // ------------------ PROFILE ------------------
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/search',
-                name: 'search',
-                builder: (_, _) => const SearchScreen(),
-              ),
-            ],
-          ),
-
-          // ------------------ SETTINGS ------------------
           StatefulShellBranch(
             routes: [
               GoRoute(
