@@ -66,8 +66,6 @@ class _CartScreenState extends State<CartScreen> {
                 return CartItemCard(
                   title: item.title,
                   price: item.price,
-                  colorName: item.colorName,
-                  color: item.color,
                   quantity: item.quantity,
                   imagePath: item.imagePath,
                   onDelete: () => _removeItem(item.id),

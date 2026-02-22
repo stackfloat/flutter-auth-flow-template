@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
+import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_event.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/widgets/profile_menu_tile.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/widgets/profile_top_bar.dart';
@@ -28,7 +31,11 @@ class ProfileScreen extends StatelessWidget {
                   for (var i = 0; i < _menuItems.length; i++) ...[
                     ProfileMenuTile(
                       label: _menuItems[i],
-                      onTap: () {},
+                      onTap: () {
+                        if (_menuItems[i] == 'Logout') {
+                          context.read<AuthBloc>().add(const LoggedOut());
+                        }
+                      },
                     ),
                     Divider(
                       height: 1,

@@ -6,8 +6,6 @@ import 'package:furniture_ecommerce_app/features/cart/presentation/widgets/quant
 class CartItemCard extends StatelessWidget {
   final String title;
   final double price;
-  final String colorName;
-  final Color color;
   final int quantity;
   final String imagePath;
   final VoidCallback onDelete;
@@ -18,8 +16,6 @@ class CartItemCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.price,
-    required this.colorName,
-    required this.color,
     required this.quantity,
     required this.imagePath,
     required this.onDelete,
@@ -77,18 +73,10 @@ class CartItemCard extends StatelessWidget {
                       width: 8.w,
                       height: 8.w,
                       decoration: BoxDecoration(
-                        color: color,
                         shape: BoxShape.circle,
                       ),
                     ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      colorName,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColors.lightTextSecondary,
-                      ),
-                    ),
+                    SizedBox(width: 4.w),                    
                   ],
                 ),
               ],
