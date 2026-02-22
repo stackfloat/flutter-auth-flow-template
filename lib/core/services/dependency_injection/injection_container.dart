@@ -14,6 +14,11 @@ import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/
 import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/signup_usecase.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signin/signin_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/signup/signup_bloc.dart';
+import 'package:furniture_ecommerce_app/features/home/data/datasources/home_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/home/data/repositories/home_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/home/domain/repositories/home_repository.dart';
+import 'package:furniture_ecommerce_app/features/home/domain/use_cases/get_home_dashboard_use_case.dart';
+import 'package:furniture_ecommerce_app/features/home/presentation/bloc/home_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/data/datasources/product_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/products/data/repositories/product_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
@@ -143,6 +148,30 @@ Future<void> initDependencies() async {
 
   sl.registerFactory<SignupBloc>(
     () => SignupBloc(sl<SignupUseCase>()),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Features - Home
+  // ---------------------------------------------------------------------------
+
+  // Data Sources
+  sl.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(sl<HomeRemoteDataSource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetHomeDashboardUseCase>(
+    () => GetHomeDashboardUseCase(sl<HomeRepository>()),
+  );
+
+  // Blocs
+  sl.registerFactory<HomeBloc>(
+    () => HomeBloc(sl<GetHomeDashboardUseCase>()),
   );
 
   // ---------------------------------------------------------------------------

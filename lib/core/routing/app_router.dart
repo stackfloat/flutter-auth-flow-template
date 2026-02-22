@@ -15,6 +15,7 @@ import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/a
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/choose_address_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/payment_completed_screen.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/screens/home_screen.dart';
+import 'package:furniture_ecommerce_app/features/home/presentation/bloc/home_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/categories_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/product_screen.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/screens/products_screen.dart';
@@ -149,7 +150,10 @@ GoRouter createRouter({
               GoRoute(
                 path: '/',
                 name: 'home',
-                builder: (_, _) => const HomeScreen(),
+                builder: (_, _) => BlocProvider(
+                  create: (_) => sl<HomeBloc>()..add(const GetHomeDashboardEvent()),
+                  child: const HomeScreen(),
+                ),
               ),
             ],
           ),
