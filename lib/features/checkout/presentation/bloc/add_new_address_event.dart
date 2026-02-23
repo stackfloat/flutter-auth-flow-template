@@ -7,30 +7,19 @@ sealed class AddNewAddressEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class AddNewAddressChanged extends AddNewAddressEvent {
-  final String? fullName;
-  final String? address;
-  final String? city;
-  final String? stateRegion;
-  final String? zip;
-  final String? country;
-  final String? phoneNumber;
+final class AddNewAddressSaved extends AddNewAddressEvent {
+  const AddNewAddressSaved();
+}
 
-  const AddNewAddressChanged({
-    this.fullName,
-    this.address,
-    this.city,
-    this.stateRegion,
-    this.zip,
-    this.country,
-    this.phoneNumber,
+final class AddNewAddressFieldChanged extends AddNewAddressEvent {
+  final String field;
+  final String value;
+
+  const AddNewAddressFieldChanged({
+    required this.field,
+    required this.value,
   });
 
   @override
-  List<Object?> get props =>
-      [fullName, address, city, stateRegion, zip, country, phoneNumber];
-}
-
-final class AddNewAddressSaved extends AddNewAddressEvent {
-  const AddNewAddressSaved();
+  List<Object?> get props => [field, value];
 }

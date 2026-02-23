@@ -1,5 +1,7 @@
 part of 'add_new_address_bloc.dart';
 
+enum AddNewAddressStatus { initial, loading, success, failure }
+
 class AddNewAddressState extends Equatable {
   final String fullName;
   final String address;
@@ -8,7 +10,10 @@ class AddNewAddressState extends Equatable {
   final String zip;
   final String country;
   final String phoneNumber;
-  final bool isSaving;
+  final bool formSubmitted;
+  final AddNewAddressErrors errors;
+  final String? serverError;
+  final AddNewAddressStatus status;
 
   const AddNewAddressState({
     this.fullName = '',
@@ -18,7 +23,10 @@ class AddNewAddressState extends Equatable {
     this.zip = '',
     this.country = 'US',
     this.phoneNumber = '',
-    this.isSaving = false,
+    this.formSubmitted = false,
+    this.errors = AddNewAddressErrors.empty,
+    this.serverError,
+    this.status = AddNewAddressStatus.initial,
   });
 
   AddNewAddressState copyWith({
@@ -29,7 +37,10 @@ class AddNewAddressState extends Equatable {
     String? zip,
     String? country,
     String? phoneNumber,
-    bool? isSaving,
+    bool? formSubmitted,
+    AddNewAddressErrors? errors,
+    AddNewAddressStatus? status,
+    Object? serverError = _unset,
   }) {
     return AddNewAddressState(
       fullName: fullName ?? this.fullName,
@@ -39,9 +50,14 @@ class AddNewAddressState extends Equatable {
       zip: zip ?? this.zip,
       country: country ?? this.country,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      isSaving: isSaving ?? this.isSaving,
+      formSubmitted: formSubmitted ?? this.formSubmitted,
+      errors: errors ?? this.errors,
+      status: status ?? this.status,
+      serverError: serverError == _unset ? this.serverError : serverError as String?,
     );
   }
+
+  static const _unset = Object();
 
   @override
   List<Object?> get props => [
@@ -52,6 +68,9 @@ class AddNewAddressState extends Equatable {
         zip,
         country,
         phoneNumber,
-        isSaving,
+        formSubmitted,
+        errors,
+        serverError,
+        status,
       ];
 }

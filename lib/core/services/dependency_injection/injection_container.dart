@@ -22,7 +22,13 @@ import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/get_cart_
 import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/remove_cart_item_use_case.dart';
 import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/update_cart_item_use_case.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:furniture_ecommerce_app/features/checkout/data/datasources/address_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/checkout/data/repositories/address_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/repositories/address_repository.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/create_address_use_case.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/get_addresses_use_case.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/choose_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/home/data/datasources/home_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/home/data/repositories/home_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/home/domain/repositories/home_repository.dart';
@@ -201,9 +207,30 @@ Future<void> initDependencies() async {
   // Features - Checkout
   // ---------------------------------------------------------------------------
 
+  // Data Sources
+  sl.registerLazySingleton<AddressRemoteDataSource>(
+    () => AddressRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<AddressRepository>(
+    () => AddressRepositoryImpl(sl<AddressRemoteDataSource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<CreateAddressUseCase>(
+    () => CreateAddressUseCase(sl<AddressRepository>()),
+  );
+  sl.registerLazySingleton<GetAddressesUseCase>(
+    () => GetAddressesUseCase(sl<AddressRepository>()),
+  );
+
   // Blocs
+  sl.registerFactory<ChooseAddressBloc>(
+    () => ChooseAddressBloc(sl<GetAddressesUseCase>()),
+  );
   sl.registerFactory<AddNewAddressBloc>(
-    () => AddNewAddressBloc(),
+    () => AddNewAddressBloc(sl<CreateAddressUseCase>()),
   );
 
   // ---------------------------------------------------------------------------

@@ -1,36 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_widget.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/choose_address_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-class ChooseAddressScreen extends StatefulWidget {
+class ChooseAddressScreen extends StatelessWidget {
   const ChooseAddressScreen({super.key});
-
-  @override
-  State<ChooseAddressScreen> createState() => _ChooseAddressScreenState();
-}
-
-class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
-  int _selectedAddressIndex = 0;
-
-  final List<_AddressItem> _addresses = const [
-    _AddressItem(
-      name: 'Charles K. Keifer',
-      addressLine1: '3012 Broaddus Avenue Saint Joseph,',
-      addressLine2: 'California 4908',
-    ),
-    _AddressItem(
-      name: 'Phyllis C. Madrid',
-      addressLine1: '1195 Sherman Street Lenora,',
-      addressLine2: 'California 6764',
-    ),
-    _AddressItem(
-      name: 'Claudia T. Reyes',
-      addressLine1: '2903 Wright Court Hackleburg,',
-      addressLine2: 'California 3556',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +41,9 @@ class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
                   const Spacer(),
                   TextButton(
                     onPressed: () {
-                      context.pushNamed('add-new-address');
+                      context.pushNamed('add-new-address').then((_) {
+                        context.read<ChooseAddressBloc>().add(const GetAddressesEvent());
+                      });
                     },
                     child: Text(
                       'NEW ADDRESS',
@@ -78,64 +57,111 @@ class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
                 ],
               ),
               Expanded(
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: _addresses.length,
-                  separatorBuilder: (_, _) => Divider(
-                    height: 24.h,
-                    color: AppColors.border.withValues(alpha: 0.6),
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = _addresses[index];
-                    final isSelected = index == _selectedAddressIndex;
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(12.r),
-                      onTap: () {
-                        setState(() {
-                          _selectedAddressIndex = index;
-                        });
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 6.h),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
+                child: BlocBuilder<ChooseAddressBloc, ChooseAddressState>(
+                  builder: (context, state) {
+                    if (state is ChooseAddressLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is ChooseAddressFailure) {
+                      return Center(
+                        child: Text(
+                          state.message,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+                    if (state is ChooseAddressLoaded) {
+                      if (state.addresses.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No addresses yet. Add a new address.',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: Colors.black54,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
+                      return ListView.separated(
+                        padding: EdgeInsets.zero,
+                        itemCount: state.addresses.length,
+                        separatorBuilder: (_, __) => Divider(
+                          height: 24.h,
+                          color: AppColors.border.withValues(alpha: 0.6),
+                        ),
+                        itemBuilder: (context, index) {
+                          final address = state.addresses[index];
+                          final isSelected = index == state.selectedIndex;
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(12.r),
+                            onTap: () {
+                              context
+                                  .read<ChooseAddressBloc>()
+                                  .add(AddressSelectedEvent(index));
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 6.h),
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    item.name,
-                                    style: textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          address.name,
+                                          style: textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8.h),
+                                        Text(
+                                          address.formattedAddress,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            height: 1.2,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        if (address.phone.isNotEmpty) ...[
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            address.phone,
+                                            style: textTheme.bodySmall?.copyWith(
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
-                                  SizedBox(height: 8.h),
-                                  Text(
-                                    '${item.addressLine1}\n${item.addressLine2}',
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      height: 1.2,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
+                                  SizedBox(width: 10.w),
+                                  _AddressSelector(isSelected: isSelected),
                                 ],
                               ),
                             ),
-                            SizedBox(width: 10.w),
-                            _AddressSelector(isSelected: isSelected),
-                          ],
-                        ),
-                      ),
-                    );
+                          );
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
                   },
                 ),
               ),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButtonWidget(
-                  buttonLabel: 'Continue',
-                  onPressEvent: () {
-                    context.pushNamed('payment-completed');
+                child: BlocBuilder<ChooseAddressBloc, ChooseAddressState>(
+                  builder: (context, state) {
+                    final canContinue = state is ChooseAddressLoaded &&
+                        state.addresses.isNotEmpty &&
+                        state.selectedIndex != null;
+                    return ElevatedButtonWidget(
+                      buttonLabel: 'Continue',
+                      enabled: canContinue,
+                      onPressEvent: () => context.pushNamed('payment-completed'),
+                    );
                   },
                 ),
               ),
@@ -285,16 +311,3 @@ class _AddressSelector extends StatelessWidget {
     );
   }
 }
-
-class _AddressItem {
-  final String name;
-  final String addressLine1;
-  final String addressLine2;
-
-  const _AddressItem({
-    required this.name,
-    required this.addressLine1,
-    required this.addressLine2,
-  });
-}
- 

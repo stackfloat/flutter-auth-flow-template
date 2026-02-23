@@ -13,6 +13,7 @@ import 'package:furniture_ecommerce_app/features/authentication/presentation/scr
 import 'package:furniture_ecommerce_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/add_new_address_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/choose_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/choose_address_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/payment_completed_screen.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/screens/home_screen.dart';
@@ -125,7 +126,10 @@ GoRouter createRouter({
       GoRoute(
         path: '/checkout/choose-address',
         name: 'choose-address',
-        builder: (_, _) => const ChooseAddressScreen(),
+        builder: (_, _) => BlocProvider(
+          create: (_) => sl<ChooseAddressBloc>()..add(const GetAddressesEvent()),
+          child: const ChooseAddressScreen(),
+        ),
       ),
       GoRoute(
         path: '/checkout/add-new-address',

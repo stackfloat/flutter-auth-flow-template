@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_widget.dart';
+import 'package:furniture_ecommerce_app/core/common/widgets/error_text_widget.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/labeled_input_field_widget.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
@@ -12,7 +13,6 @@ class AddNewAddressScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final bloc = context.read<AddNewAddressBloc>();
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
@@ -24,116 +24,199 @@ class AddNewAddressScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
-          child: Column(
-            children: [
-              const _CheckoutProgress(),
-              SizedBox(height: 28.h),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: BlocBuilder<AddNewAddressBloc, AddNewAddressState>(
-                    builder: (context, state) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Deliver To',
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
+      body: BlocListener<AddNewAddressBloc, AddNewAddressState>(
+        listenWhen: (previous, current) =>
+            previous.status != current.status &&
+            current.status == AddNewAddressStatus.success,
+        listener: (context, state) => Navigator.of(context).maybePop(),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
+            child: Column(
+              children: [
+                const _CheckoutProgress(),
+                SizedBox(height: 28.h),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: BlocBuilder<AddNewAddressBloc, AddNewAddressState>(
+                      builder: (context, state) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Deliver To',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 24.h),
-                        LabeledInputFieldWidget(
-                          label: 'Full Name*',
-                          value: state.fullName,
-                          keyboardType: TextInputType.name,
-                          onChanged: (value) =>
-                              bloc.add(AddNewAddressChanged(fullName: value)),
-                        ),
-                        SizedBox(height: 24.h),
-                        LabeledInputFieldWidget(
-                          label: 'Address*',
-                          value: state.address,
-                          keyboardType: TextInputType.streetAddress,
-                          maxLines: 2,
-                          onChanged: (value) =>
-                              bloc.add(AddNewAddressChanged(address: value)),
-                        ),
-                        SizedBox(height: 24.h),
-                        LabeledInputFieldWidget(
-                          label: 'City*',
-                          value: state.city,
-                          keyboardType: TextInputType.streetAddress,
-                          onChanged: (value) =>
-                              bloc.add(AddNewAddressChanged(city: value)),
-                        ),
-                        SizedBox(height: 24.h),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: LabeledInputFieldWidget(
-                                label: 'State*',
-                                value: state.stateRegion,
-                                keyboardType: TextInputType.streetAddress,
-                                onChanged: (value) => bloc.add(
-                                  AddNewAddressChanged(stateRegion: value),
+                          SizedBox(height: 24.h),
+                          const _AddressGlobalErrors(),
+                          LabeledInputFieldWidget(
+                            label: 'Full Name*',
+                            value: state.fullName,
+                            keyboardType: TextInputType.name,
+                            errorMessage:
+                                state.formSubmitted ? state.errors.fullName : null,
+                            onChanged: (value) => context
+                                .read<AddNewAddressBloc>()
+                                .add(
+                                  AddNewAddressFieldChanged(
+                                    field: 'fullName',
+                                    value: value,
+                                  ),
+                                ),
+                          ),
+                          SizedBox(height: 24.h),
+                          LabeledInputFieldWidget(
+                            label: 'Address*',
+                            value: state.address,
+                            keyboardType: TextInputType.streetAddress,
+                            maxLines: 2,
+                            errorMessage:
+                                state.formSubmitted ? state.errors.address : null,
+                            onChanged: (value) => context
+                                .read<AddNewAddressBloc>()
+                                .add(
+                                  AddNewAddressFieldChanged(
+                                    field: 'address',
+                                    value: value,
+                                  ),
+                                ),
+                          ),
+                          SizedBox(height: 24.h),
+                          LabeledInputFieldWidget(
+                            label: 'City*',
+                            value: state.city,
+                            keyboardType: TextInputType.streetAddress,
+                            errorMessage:
+                                state.formSubmitted ? state.errors.city : null,
+                            onChanged: (value) => context
+                                .read<AddNewAddressBloc>()
+                                .add(
+                                  AddNewAddressFieldChanged(
+                                    field: 'city',
+                                    value: value,
+                                  ),
+                                ),
+                          ),
+                          SizedBox(height: 24.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: LabeledInputFieldWidget(
+                                  label: 'State*',
+                                  value: state.stateRegion,
+                                  keyboardType: TextInputType.streetAddress,
+                                  errorMessage: state.formSubmitted
+                                      ? state.errors.stateRegion
+                                      : null,
+                                  onChanged: (value) => context
+                                      .read<AddNewAddressBloc>()
+                                      .add(
+                                        AddNewAddressFieldChanged(
+                                          field: 'stateRegion',
+                                          value: value,
+                                        ),
+                                      ),
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 18.w),
-                            Expanded(
-                              flex: 2,
-                              child: LabeledInputFieldWidget(
-                                label: 'ZIP*',
-                                value: state.zip,
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) =>
-                                    bloc.add(AddNewAddressChanged(zip: value)),
+                              SizedBox(width: 18.w),
+                              Expanded(
+                                flex: 2,
+                                child: LabeledInputFieldWidget(
+                                  label: 'ZIP*',
+                                  value: state.zip,
+                                  keyboardType: TextInputType.number,
+                                  errorMessage:
+                                      state.formSubmitted ? state.errors.zip : null,
+                                  onChanged: (value) => context
+                                      .read<AddNewAddressBloc>()
+                                      .add(
+                                        AddNewAddressFieldChanged(
+                                          field: 'zip',
+                                          value: value,
+                                        ),
+                                      ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 24.h),
-                        _LabeledDropdownField(
-                          label: 'Country*',
-                          value: state.country,
-                          options: const ['US'],
-                          onChanged: (value) {
-                            if (value == null) return;
-                            bloc.add(AddNewAddressChanged(country: value));
-                          },
-                        ),
-                        SizedBox(height: 24.h),
-                        LabeledInputFieldWidget(
-                          label: 'Phone Number*',
-                          value: state.phoneNumber,
-                          keyboardType: TextInputType.phone,
-                          onChanged: (value) =>
-                              bloc.add(AddNewAddressChanged(phoneNumber: value)),
-                        ),
-                        SizedBox(height: 24.h),
-                      ],
+                            ],
+                          ),
+                          SizedBox(height: 24.h),
+                          _LabeledDropdownField(
+                            label: 'Country*',
+                            value: state.country,
+                            options: const ['US'],
+                            errorMessage:
+                                state.formSubmitted ? state.errors.country : null,
+                            onChanged: (value) {
+                              if (value == null) return;
+                              context.read<AddNewAddressBloc>().add(
+                                    AddNewAddressFieldChanged(
+                                      field: 'country',
+                                      value: value,
+                                    ),
+                                  );
+                            },
+                          ),
+                          SizedBox(height: 24.h),
+                          LabeledInputFieldWidget(
+                            label: 'Phone Number*',
+                            value: state.phoneNumber,
+                            keyboardType: TextInputType.phone,
+                            errorMessage: state.formSubmitted
+                                ? state.errors.phoneNumber
+                                : null,
+                            onChanged: (value) => context
+                                .read<AddNewAddressBloc>()
+                                .add(
+                                  AddNewAddressFieldChanged(
+                                    field: 'phoneNumber',
+                                    value: value,
+                                  ),
+                                ),
+                          ),
+                          SizedBox(height: 24.h),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              BlocBuilder<AddNewAddressBloc, AddNewAddressState>(
-                builder: (context, state) => SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButtonWidget(
-                    buttonLabel: state.isSaving ? 'Saving...' : 'Save',
-                    onPressEvent: () => bloc.add(const AddNewAddressSaved()),
+                BlocBuilder<AddNewAddressBloc, AddNewAddressState>(
+                  builder: (context, state) => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButtonWidget(
+                      buttonLabel: 'Save',
+                      isLoading: state.status == AddNewAddressStatus.loading,
+                      onPressEvent: () => context
+                          .read<AddNewAddressBloc>()
+                          .add(const AddNewAddressSaved()),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+}
+
+class _AddressGlobalErrors extends StatelessWidget {
+  const _AddressGlobalErrors();
+
+  @override
+  Widget build(BuildContext context) {
+    final serverError = context.select(
+      (AddNewAddressBloc bloc) => bloc.state.serverError,
+    );
+
+    if (serverError == null) {
+      return const SizedBox.shrink();
+    }
+
+    return ErrorTextWidget(errorMessage: serverError);
   }
 }
 
@@ -248,12 +331,14 @@ class _LabeledDropdownField extends StatelessWidget {
   final String value;
   final List<String> options;
   final ValueChanged<String?> onChanged;
+  final String? errorMessage;
 
   const _LabeledDropdownField({
     required this.label,
     required this.value,
     required this.options,
     required this.onChanged,
+    this.errorMessage,
   });
 
   @override
@@ -282,6 +367,7 @@ class _LabeledDropdownField extends StatelessWidget {
           icon: const Icon(Icons.keyboard_arrow_down_rounded),
           style: textTheme.bodyLarge?.copyWith(color: Colors.black),
           decoration: InputDecoration(
+            errorText: errorMessage,
             isDense: true,
             filled: false,
             contentPadding: EdgeInsets.only(bottom: 10.h),

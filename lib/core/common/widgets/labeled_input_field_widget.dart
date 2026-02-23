@@ -10,6 +10,7 @@ class LabeledInputFieldWidget extends StatelessWidget {
     required this.keyboardType,
     required this.onChanged,
     this.maxLines = 1,
+    this.errorMessage,
   });
 
   final String label;
@@ -17,6 +18,7 @@ class LabeledInputFieldWidget extends StatelessWidget {
   final TextInputType keyboardType;
   final ValueChanged<String> onChanged;
   final int maxLines;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +40,7 @@ class LabeledInputFieldWidget extends StatelessWidget {
           style: textTheme.bodyLarge?.copyWith(color: Colors.black),
           cursorColor: Colors.black,
           decoration: InputDecoration(
+            errorText: errorMessage,
             isDense: true,
             filled: false,
             contentPadding: EdgeInsets.only(bottom: 10.h),
@@ -48,6 +51,12 @@ class LabeledInputFieldWidget extends StatelessWidget {
             ),
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.black, width: 1.4),
+            ),
+            errorBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red, width: 1.4),
+            ),
+            focusedErrorBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red, width: 1.4),
             ),
           ),
         ),
