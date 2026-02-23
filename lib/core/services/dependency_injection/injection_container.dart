@@ -22,6 +22,7 @@ import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/get_cart_
 import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/remove_cart_item_use_case.dart';
 import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/update_cart_item_use_case.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/home/data/datasources/home_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/home/data/repositories/home_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/home/domain/repositories/home_repository.dart';
@@ -194,6 +195,15 @@ Future<void> initDependencies() async {
       sl<UpdateCartItemUseCase>(),
       sl<RemoveCartItemUseCase>(),
     ),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Features - Checkout
+  // ---------------------------------------------------------------------------
+
+  // Blocs
+  sl.registerFactory<AddNewAddressBloc>(
+    () => AddNewAddressBloc(),
   );
 
   // ---------------------------------------------------------------------------
