@@ -11,6 +11,7 @@ class LabeledInputFieldWidget extends StatelessWidget {
     required this.onChanged,
     this.maxLines = 1,
     this.errorMessage,
+    this.obscureText = false,
   });
 
   final String label;
@@ -19,6 +20,7 @@ class LabeledInputFieldWidget extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final int maxLines;
   final String? errorMessage;
+  final bool obscureText;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class LabeledInputFieldWidget extends StatelessWidget {
           onChanged: onChanged,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          obscureText: obscureText,
           style: textTheme.bodyLarge?.copyWith(color: Colors.black),
           cursorColor: Colors.black,
           decoration: InputDecoration(

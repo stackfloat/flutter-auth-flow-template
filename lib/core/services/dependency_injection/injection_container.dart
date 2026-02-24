@@ -50,7 +50,15 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_edit_profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_favorites_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:furniture_ecommerce_app/features/profile/domain/use_cases/change_password_use_case.dart';
+import 'package:furniture_ecommerce_app/features/profile/domain/use_cases/get_profile_use_case.dart';
+import 'package:furniture_ecommerce_app/features/profile/domain/use_cases/update_profile_use_case.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_change_password_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -239,7 +247,41 @@ Future<void> initDependencies() async {
     () => UpdateAddressUseCase(sl<AddressRepository>()),
   );
 
+  // ---------------------------------------------------------------------------
+  // Features - Profile
+  // ---------------------------------------------------------------------------
+
+  // Data Sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(sl<ProfileRemoteDataSource>()),
+  );
+
+  // Use Cases
+  sl.registerLazySingleton<GetProfileUseCase>(
+    () => GetProfileUseCase(sl<ProfileRepository>()),
+  );
+  sl.registerLazySingleton<UpdateProfileUseCase>(
+    () => UpdateProfileUseCase(sl<ProfileRepository>()),
+  );
+  sl.registerLazySingleton<ChangePasswordUseCase>(
+    () => ChangePasswordUseCase(sl<ProfileRepository>()),
+  );
+
   // Blocs
+  sl.registerFactory<ProfileEditProfileBloc>(
+    () => ProfileEditProfileBloc(
+      sl<GetProfileUseCase>(),
+      sl<UpdateProfileUseCase>(),
+    ),
+  );
+  sl.registerFactory<ProfileChangePasswordBloc>(
+    () => ProfileChangePasswordBloc(sl<ChangePasswordUseCase>()),
+  );
   sl.registerFactory<ProfileAddressesBloc>(
     () => ProfileAddressesBloc(
       sl<GetAddressesUseCase>(),

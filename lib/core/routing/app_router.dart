@@ -25,8 +25,12 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_change_password_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_edit_profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_favorites_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_edit_address_screen.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_change_password_screen.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_edit_profile_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_favorites_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_shipping_addresses_screen.dart';
@@ -148,6 +152,23 @@ GoRouter createRouter({
         path: '/checkout/payment-completed',
         name: 'payment-completed',
         builder: (_, _) => const PaymentCompletedScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        name: 'profile-edit',
+        builder: (_, _) => BlocProvider(
+          create: (_) =>
+              sl<ProfileEditProfileBloc>()..add(const ProfileEditProfileLoadRequested()),
+          child: const ProfileEditProfileScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/profile/change-password',
+        name: 'profile-change-password',
+        builder: (_, _) => BlocProvider(
+          create: (_) => sl<ProfileChangePasswordBloc>(),
+          child: const ProfileChangePasswordScreen(),
+        ),
       ),
       GoRoute(
         path: '/profile/shipping-addresses',
