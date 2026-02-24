@@ -86,7 +86,10 @@ class DioClient {
     } on DioException catch (e) {
       return Left(_handleDioException(e));
     } catch (e) {
-      return Left(ServerFailure(message: 'An unexpected error occurred.'));
+      final message = e is FormatException
+          ? e.message
+          : (e.toString().isNotEmpty ? e.toString() : 'An unexpected error occurred.');
+      return Left(ServerFailure(message: message));
     }
   }
 

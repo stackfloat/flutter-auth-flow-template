@@ -26,7 +26,9 @@ import 'package:furniture_ecommerce_app/features/checkout/data/datasources/addre
 import 'package:furniture_ecommerce_app/features/checkout/data/repositories/address_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/repositories/address_repository.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/create_address_use_case.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/get_address_use_case.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/get_addresses_use_case.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/update_address_use_case.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/choose_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/home/data/datasources/home_remote_data_source.dart';
@@ -46,6 +48,7 @@ import 'package:furniture_ecommerce_app/features/products/domain/use_cases/remov
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -227,8 +230,21 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<GetAddressesUseCase>(
     () => GetAddressesUseCase(sl<AddressRepository>()),
   );
+  sl.registerLazySingleton<GetAddressUseCase>(
+    () => GetAddressUseCase(sl<AddressRepository>()),
+  );
+  sl.registerLazySingleton<UpdateAddressUseCase>(
+    () => UpdateAddressUseCase(sl<AddressRepository>()),
+  );
 
   // Blocs
+  sl.registerFactory<ProfileAddressesBloc>(
+    () => ProfileAddressesBloc(
+      sl<GetAddressesUseCase>(),
+      sl<GetAddressUseCase>(),
+      sl<UpdateAddressUseCase>(),
+    ),
+  );
   sl.registerFactory<ChooseAddressBloc>(
     () => ChooseAddressBloc(sl<GetAddressesUseCase>()),
   );

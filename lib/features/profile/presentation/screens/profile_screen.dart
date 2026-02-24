@@ -7,6 +7,7 @@ import 'package:furniture_ecommerce_app/features/authentication/presentation/blo
 import 'package:furniture_ecommerce_app/features/profile/presentation/widgets/profile_header_card.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/widgets/profile_menu_tile.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/widgets/profile_top_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -34,6 +35,8 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (_menuItems[i] == 'Logout') {
                           context.read<AuthBloc>().add(const LoggedOut());
+                        } else if (_menuItems[i] == 'Shipping Address') {
+                          context.pushNamed('profile-shipping-addresses');
                         }
                       },
                     ),

@@ -24,7 +24,10 @@ import 'package:furniture_ecommerce_app/features/products/presentation/screens/p
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_edit_address_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_shipping_addresses_screen.dart';
 import 'package:go_router/go_router.dart';
 
 // Define public routes (routes that don't require authentication)
@@ -143,6 +146,27 @@ GoRouter createRouter({
         path: '/checkout/payment-completed',
         name: 'payment-completed',
         builder: (_, _) => const PaymentCompletedScreen(),
+      ),
+      GoRoute(
+        path: '/profile/shipping-addresses',
+        name: 'profile-shipping-addresses',
+        builder: (_, _) => BlocProvider(
+          create: (_) => sl<ProfileAddressesBloc>()
+            ..add(const ProfileAddressesLoadRequested()),
+          child: const ProfileShippingAddressesScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/profile/shipping-addresses/edit/:id',
+        name: 'profile-edit-address',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '0';
+          return BlocProvider(
+            create: (_) => sl<ProfileAddressesBloc>()
+              ..add(ProfileAddressForEditLoadRequested(addressId: int.tryParse(id) ?? 0)),
+            child: ProfileEditAddressScreen(addressId: id),
+          );
+        },
       ),
 
       // ------------------ PROTECTED ROUTES (with bottom nav) ------------------

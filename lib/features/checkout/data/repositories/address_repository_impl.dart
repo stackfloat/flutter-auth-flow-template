@@ -6,6 +6,7 @@ import 'package:furniture_ecommerce_app/features/checkout/domain/entities/addres
 import 'package:furniture_ecommerce_app/features/checkout/domain/failures/address_validation_failure.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/repositories/address_repository.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/create_address_params.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/update_address_params.dart';
 
 class AddressRepositoryImpl implements AddressRepository {
   final AddressRemoteDataSource remoteDataSource;
@@ -19,8 +20,23 @@ class AddressRepositoryImpl implements AddressRepository {
   }
 
   @override
+  ResultFuture<Address> getAddress(int id) async {
+    final result = await remoteDataSource.getAddress(id);
+    return result.map((address) => address);
+  }
+
+  @override
   ResultFuture<void> createAddress(CreateAddressParams params) async {
     final result = await remoteDataSource.createAddress(params);
+    return result.fold(
+      (failure) async => Left(_mapFailure(failure)),
+      (_) async => const Right(null),
+    );
+  }
+
+  @override
+  ResultFuture<void> updateAddress(UpdateAddressParams params) async {
+    final result = await remoteDataSource.updateAddress(params);
     return result.fold(
       (failure) async => Left(_mapFailure(failure)),
       (_) async => const Right(null),
