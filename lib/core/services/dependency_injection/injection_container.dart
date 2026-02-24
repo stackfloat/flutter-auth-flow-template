@@ -36,6 +36,7 @@ import 'package:furniture_ecommerce_app/features/home/domain/use_cases/get_home_
 import 'package:furniture_ecommerce_app/features/home/presentation/bloc/home_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/data/datasources/product_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/products/data/repositories/product_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/products/data/services/favorites_notifier.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/add_to_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_categories_use_case.dart';
@@ -268,10 +269,14 @@ Future<void> initDependencies() async {
     () => ProductRemoteDataSourceImpl(sl<DioClient>()),
   );
 
+  // Services
+  sl.registerLazySingleton<FavoritesNotifier>(() => FavoritesNotifier());
+
   // Repository
   sl.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(
       sl<ProductRemoteDataSource>(),
+      sl<FavoritesNotifier>(),
     ),
   );
 
@@ -298,6 +303,7 @@ Future<void> initDependencies() async {
       sl<GetProductsUseCase>(),
       sl<AddToFavoritesUseCase>(),
       sl<RemoveFromFavoritesUseCase>(),
+      sl<FavoritesNotifier>(),
     ),
   );
   sl.registerFactory<CategoriesBloc>(

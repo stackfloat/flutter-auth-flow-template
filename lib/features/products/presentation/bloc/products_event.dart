@@ -93,3 +93,16 @@ final class ProductFavoriteToggled extends ProductsEvent {
   @override
   List<Object?> get props => [productId];
 }
+
+final class ProductFavoriteUpdated extends ProductsEvent {
+  final int productId;
+  final bool isFavorite;
+
+  const ProductFavoriteUpdated({
+    required this.productId,
+    required this.isFavorite,
+  });
+
+  @override
+  List<Object?> get props => [productId, isFavorite];
+}

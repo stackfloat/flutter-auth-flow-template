@@ -91,11 +91,15 @@ class ProductsScreen extends StatelessWidget {
                             price: product.price,
                             imagePath: product.photo,
                             isFavorite: product.isFavorite,
-                            onFavoriteTap: () {},
-                            onTap: () => context.pushNamed(
-                              'product',
-                              pathParameters: {'id': product.id.toString()},
-                            ),
+                            onFavoriteTap: () => context
+                                .read<ProductsBloc>()
+                                .add(ProductFavoriteToggled(product.id)),
+                            onTap: () {
+                              context.pushNamed(
+                                'product',
+                                pathParameters: {'id': product.id.toString()},
+                              );
+                            },
                           );
                         },
                         childCount: loadedState.products.length,

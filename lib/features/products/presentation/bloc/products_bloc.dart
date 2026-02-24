@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:furniture_ecommerce_app/core/entities/product.dart';
+import 'package:furniture_ecommerce_app/features/products/data/services/favorites_notifier.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/add_to_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/remove_from_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
@@ -16,11 +19,15 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   final GetProductsUseCase getProductsUseCase;
   final AddToFavoritesUseCase addToFavoritesUseCase;
   final RemoveFromFavoritesUseCase removeFromFavoritesUseCase;
+  final FavoritesNotifier favoritesNotifier;
+
+  StreamSubscription<({int productId, bool isFavorite})>? _favoritesSubscription;
 
   ProductsBloc(
     this.getProductsUseCase,
     this.addToFavoritesUseCase,
     this.removeFromFavoritesUseCase,
+    this.favoritesNotifier,
   ) : super(ProductsInitial()) {
     on<GetProductsEvent>(_onGetProducts);
     on<ProductCategoryChanged>(_onProductCategoryChanged);
@@ -28,6 +35,20 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<ProductFiltersApplied>(_onProductFiltersApplied);
     on<ProductsNextPageRequested>(_onProductsNextPageRequested);
     on<ProductFavoriteToggled>(_onProductFavoriteToggled);
+    on<ProductFavoriteUpdated>(_onProductFavoriteUpdated);
+
+    _favoritesSubscription = favoritesNotifier.favoriteChanges.listen((event) {
+      add(ProductFavoriteUpdated(
+        productId: event.productId,
+        isFavorite: event.isFavorite,
+      ));
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _favoritesSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onProductFavoriteToggled(
@@ -65,6 +86,32 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       },
       (_) {},
     );
+  }
+
+  void _onProductFavoriteUpdated(
+    ProductFavoriteUpdated event,
+    Emitter<ProductsState> emit,
+  ) {
+    if (state is! ProductsLoaded) return;
+    final current = state as ProductsLoaded;
+    final index = current.products.indexWhere((p) => p.id == event.productId);
+    if (index < 0) return;
+
+    final product = current.products[index];
+    if (product.isFavorite == event.isFavorite) return;
+
+    final updatedProducts = [
+      ...current.products.sublist(0, index),
+      Product(
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        photo: product.photo,
+        isFavorite: event.isFavorite,
+      ),
+      ...current.products.sublist(index + 1),
+    ];
+    emit(current.copyWith(products: updatedProducts));
   }
 
   Future<void> _onProductCategoryChanged(

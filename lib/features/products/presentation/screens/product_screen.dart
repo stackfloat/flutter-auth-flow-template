@@ -25,118 +25,121 @@ class ProductScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.lightBackground,
-        body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
-          builder: (context, state) {
-            if (state is ProductDetailsLoading || state is ProductDetailsInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is ProductDetailsFailure) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Text(
-                    state.message,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
-
-            final product = (state as ProductDetailsLoaded).product;
-            final selectedQuantity = state.selectedQuantity;
-            return Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _ProductHero(imagePath: product.photo),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product.name,
-                                style: TextStyle(
-                                  fontSize: 26.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.lightText,
-                                  height: 1.15,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                '\$${product.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  fontSize: 24.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.lightText,
-                                ),
-                              ),
-                              SizedBox(height: 14.h),
-                              Divider(color: Colors.black12, height: 1.h),
-                              SizedBox(height: 14.h),
-                              Text(
-                                'Colors',
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.lightText,
-                                ),
-                              ),
-                              SizedBox(height: 12.h),
-                              _ColorOptionsRow(colors: product.colors),
-                              SizedBox(height: 14.h),
-                              Divider(color: Colors.black12, height: 1.h),
-                              SizedBox(height: 14.h),
-                              Text(
-                                'Description',
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.lightText,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                product.description.isEmpty
-                                    ? 'No description available.'
-                                    : product.description,
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.lightTextSecondary,
-                                  height: 1.5,
-                                ),
-                              ),
-                              SizedBox(height: 16.h),
-                              _InfoRow(
-                                label: 'Categories',
-                                value: _joinCategoryNames(product),
-                              ),
-                              SizedBox(height: 8.h),
-                              _InfoRow(
-                                label: 'Materials',
-                                value: _joinMaterialNames(product),
-                              ),
-                              SizedBox(height: 24.h),
-                            ],
-                          ),
-                        ),
-                      ],
+          backgroundColor: AppColors.lightBackground,
+          body: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
+            builder: (context, state) {
+              if (state is ProductDetailsLoading || state is ProductDetailsInitial) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is ProductDetailsFailure) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Text(
+                      state.message,
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                ),
-                _BottomActionBar(
-                  productId: product.id,
-                  selectedQuantity: selectedQuantity,
-                ),
-              ],
-            );
-          },
+                );
+              }
+
+              final product = (state as ProductDetailsLoaded).product;
+              final selectedQuantity = state.selectedQuantity;
+              return Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _ProductHero(
+                            imagePath: product.photo,
+                            onBackTap: () => context.pop(),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.name,
+                                  style: TextStyle(
+                                    fontSize: 26.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lightText,
+                                    height: 1.15,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  '\$${product.price.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lightText,
+                                  ),
+                                ),
+                                SizedBox(height: 14.h),
+                                Divider(color: Colors.black12, height: 1.h),
+                                SizedBox(height: 14.h),
+                                Text(
+                                  'Colors',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lightText,
+                                  ),
+                                ),
+                                SizedBox(height: 12.h),
+                                _ColorOptionsRow(colors: product.colors),
+                                SizedBox(height: 14.h),
+                                Divider(color: Colors.black12, height: 1.h),
+                                SizedBox(height: 14.h),
+                                Text(
+                                  'Description',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.lightText,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  product.description.isEmpty
+                                      ? 'No description available.'
+                                      : product.description,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.lightTextSecondary,
+                                    height: 1.5,
+                                  ),
+                                ),
+                                SizedBox(height: 16.h),
+                                _InfoRow(
+                                  label: 'Categories',
+                                  value: _joinCategoryNames(product),
+                                ),
+                                SizedBox(height: 8.h),
+                                _InfoRow(
+                                  label: 'Materials',
+                                  value: _joinMaterialNames(product),
+                                ),
+                                SizedBox(height: 24.h),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  _BottomActionBar(
+                    productId: product.id,
+                    selectedQuantity: selectedQuantity,
+                  ),
+                ],
+              );
+            },
         ),
       ),
     );
@@ -155,8 +158,9 @@ class ProductScreen extends StatelessWidget {
 
 class _ProductHero extends StatelessWidget {
   final String imagePath;
+  final VoidCallback onBackTap;
 
-  const _ProductHero({required this.imagePath});
+  const _ProductHero({required this.imagePath, required this.onBackTap});
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +212,7 @@ class _ProductHero extends StatelessWidget {
                 elevation: 1,
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () => Navigator.of(context).maybePop(),
+                  onTap: onBackTap,
                   child: SizedBox(
                     width: 38.w,
                     height: 38.w,
