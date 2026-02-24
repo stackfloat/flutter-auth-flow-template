@@ -2,6 +2,7 @@ import 'package:furniture_ecommerce_app/core/services/network/dio_client.dart';
 import 'package:furniture_ecommerce_app/core/utils/typedef.dart';
 import 'package:furniture_ecommerce_app/features/products/data/models/category_list_item_model.dart';
 import 'package:furniture_ecommerce_app/features/products/data/models/product_details_model.dart';
+import 'package:furniture_ecommerce_app/features/products/data/models/product_model.dart';
 import 'package:furniture_ecommerce_app/features/products/data/models/products_response_model.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_params.dart';
 
@@ -9,6 +10,7 @@ abstract class ProductRemoteDataSource {
   ResultFuture<ProductsResponseModel> getProducts(GetProductsParams params);
   ResultFuture<List<CategoryListItemModel>> getCategories();
   ResultFuture<ProductDetailsModel> getProductDetails(int productId);
+  ResultFuture<List<ProductModel>> getFavorites();
   ResultFuture<void> addToFavorites(int productId);
   ResultFuture<void> removeFromFavorites(int productId);
 }
@@ -94,6 +96,43 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
         }
 
         return ProductDetailsModel.fromApiJson(productData);
+      },
+    );
+  }
+
+  @override
+  ResultFuture<List<ProductModel>> getFavorites() {
+    return _dioClient.get<List<ProductModel>>(
+      '/favorites',
+      parser: (data) {
+        if (data is! Map<String, dynamic>) return <ProductModel>[];
+        final payload = data['data'] is Map<String, dynamic>
+            ? data['data'] as Map<String, dynamic>
+            : data;
+
+        final favoritesRaw = payload['favorites'];
+        final productsRaw = payload['products'];
+        final rawList = favoritesRaw is List
+            ? favoritesRaw
+            : favoritesRaw is Map<String, dynamic> && favoritesRaw['data'] is List
+                ? favoritesRaw['data'] as List
+                : productsRaw is List
+                    ? productsRaw
+                    : productsRaw is Map<String, dynamic> && productsRaw['data'] is List
+                        ? productsRaw['data'] as List
+                        : const <dynamic>[];
+
+        return rawList
+            .whereType<Map<String, dynamic>>()
+            .map((item) {
+              final productData = item['product'];
+              final source = productData is Map<String, dynamic> ? productData : item;
+              return ProductModel.fromApiJson({
+                ...source,
+                'is_favorite': true,
+              });
+            })
+            .toList();
       },
     );
   }

@@ -2,6 +2,7 @@ import 'package:furniture_ecommerce_app/core/utils/typedef.dart';
 import 'package:furniture_ecommerce_app/features/products/data/datasources/product_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/products/data/services/favorites_notifier.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/category_list_item.dart';
+import 'package:furniture_ecommerce_app/core/entities/product.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/product_details.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/products_page_data.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
@@ -38,6 +39,12 @@ class ProductRepositoryImpl implements ProductRepository {
   ResultFuture<ProductDetails> getProductDetails(int productId) async {
     final result = await productRemoteDataSource.getProductDetails(productId);
     return result.map((details) => details);
+  }
+
+  @override
+  ResultFuture<List<Product>> getFavorites() async {
+    final result = await productRemoteDataSource.getFavorites();
+    return result.map((products) => products);
   }
 
   @override

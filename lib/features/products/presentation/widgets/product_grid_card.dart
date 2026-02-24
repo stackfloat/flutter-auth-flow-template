@@ -11,6 +11,8 @@ class ProductGridCard extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onTap;
+  final IconData? favoriteActionIcon;
+  final Color? favoriteActionIconColor;
 
   const ProductGridCard({
     super.key,
@@ -20,6 +22,8 @@ class ProductGridCard extends StatelessWidget {
     this.isFavorite = false,
     this.onFavoriteTap,
     this.onTap,
+    this.favoriteActionIcon,
+    this.favoriteActionIconColor,
   });
 
   @override
@@ -75,13 +79,15 @@ class ProductGridCard extends StatelessWidget {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            isFavorite
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
+                            favoriteActionIcon ??
+                                (isFavorite
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded),
                             size: 18.sp,
-                            color: isFavorite
-                                ? Colors.redAccent
-                                : AppColors.lightText,
+                            color: favoriteActionIconColor ??
+                                (isFavorite
+                                    ? Colors.redAccent
+                                    : AppColors.lightText),
                           ),
                         ),
                       ),

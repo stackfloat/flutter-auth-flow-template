@@ -25,7 +25,9 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_favorites_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_edit_address_screen.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_favorites_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/screens/profile_shipping_addresses_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -167,6 +169,15 @@ GoRouter createRouter({
             child: ProfileEditAddressScreen(addressId: id),
           );
         },
+      ),
+      GoRoute(
+        path: '/profile/favorites',
+        name: 'profile-favorites',
+        builder: (_, _) => BlocProvider(
+          create: (_) =>
+              sl<ProfileFavoritesBloc>()..add(const ProfileFavoritesRequested()),
+          child: const ProfileFavoritesScreen(),
+        ),
       ),
 
       // ------------------ PROTECTED ROUTES (with bottom nav) ------------------

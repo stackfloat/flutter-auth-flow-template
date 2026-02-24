@@ -42,6 +42,7 @@ import 'package:furniture_ecommerce_app/features/products/data/services/favorite
 import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/add_to_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_categories_use_case.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_product_details_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/remove_from_favorites_use_case.dart';
@@ -49,6 +50,7 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_favorites_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -306,6 +308,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<GetProductDetailsUseCase>(
     () => GetProductDetailsUseCase(sl<ProductRepository>()),
   );
+  sl.registerLazySingleton<GetFavoritesUseCase>(
+    () => GetFavoritesUseCase(sl<ProductRepository>()),
+  );
   sl.registerLazySingleton<AddToFavoritesUseCase>(
     () => AddToFavoritesUseCase(sl<ProductRepository>()),
   );
@@ -330,6 +335,13 @@ Future<void> initDependencies() async {
       sl<GetProductDetailsUseCase>(),
       sl<AddToFavoritesUseCase>(),
       sl<RemoveFromFavoritesUseCase>(),
+    ),
+  );
+  sl.registerFactory<ProfileFavoritesBloc>(
+    () => ProfileFavoritesBloc(
+      sl<GetFavoritesUseCase>(),
+      sl<RemoveFromFavoritesUseCase>(),
+      sl<FavoritesNotifier>(),
     ),
   );
 

@@ -35,6 +35,8 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () {
                         if (_menuItems[i] == 'Logout') {
                           context.read<AuthBloc>().add(const LoggedOut());
+                        } else if (_menuItems[i] == 'My Favourites') {
+                          context.pushNamed('profile-favorites');
                         } else if (_menuItems[i] == 'Shipping Address') {
                           context.pushNamed('profile-shipping-addresses');
                         }
