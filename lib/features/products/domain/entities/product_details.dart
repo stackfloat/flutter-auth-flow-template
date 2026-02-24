@@ -26,6 +26,30 @@ class ProductDetails extends Equatable {
     this.colors = const [],
   });
 
+  ProductDetails copyWith({
+    int? id,
+    String? name,
+    double? price,
+    String? description,
+    String? photo,
+    bool? isFavorite,
+    List<Category>? categories,
+    List<ProductMaterial>? materials,
+    List<ProductColor>? colors,
+  }) {
+    return ProductDetails(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      description: description ?? this.description,
+      photo: photo ?? this.photo,
+      isFavorite: isFavorite ?? this.isFavorite,
+      categories: categories ?? this.categories,
+      materials: materials ?? this.materials,
+      colors: colors ?? this.colors,
+    );
+  }
+
   @override
   List<Object?> get props => [
         id,

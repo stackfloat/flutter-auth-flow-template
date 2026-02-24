@@ -9,6 +9,8 @@ abstract class ProductRemoteDataSource {
   ResultFuture<ProductsResponseModel> getProducts(GetProductsParams params);
   ResultFuture<List<CategoryListItemModel>> getCategories();
   ResultFuture<ProductDetailsModel> getProductDetails(int productId);
+  ResultFuture<void> addToFavorites(int productId);
+  ResultFuture<void> removeFromFavorites(int productId);
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -93,6 +95,23 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
         return ProductDetailsModel.fromApiJson(productData);
       },
+    );
+  }
+
+  @override
+  ResultFuture<void> addToFavorites(int productId) {
+    return _dioClient.post<void>(
+      '/favorites',
+      data: {'product_id': productId},
+      parser: (_) => null,
+    );
+  }
+
+  @override
+  ResultFuture<void> removeFromFavorites(int productId) {
+    return _dioClient.delete<void>(
+      '/favorites/$productId',
+      parser: (_) => null,
     );
   }
 }

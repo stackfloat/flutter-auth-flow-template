@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:furniture_ecommerce_app/core/entities/product.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/add_to_favorites_use_case.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/remove_from_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/category.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/color.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/material.dart';
@@ -12,13 +14,57 @@ part 'products_state.dart';
 
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   final GetProductsUseCase getProductsUseCase;
+  final AddToFavoritesUseCase addToFavoritesUseCase;
+  final RemoveFromFavoritesUseCase removeFromFavoritesUseCase;
 
-  ProductsBloc(this.getProductsUseCase) : super(ProductsInitial()) {
+  ProductsBloc(
+    this.getProductsUseCase,
+    this.addToFavoritesUseCase,
+    this.removeFromFavoritesUseCase,
+  ) : super(ProductsInitial()) {
     on<GetProductsEvent>(_onGetProducts);
     on<ProductCategoryChanged>(_onProductCategoryChanged);
     on<ProductFiltersUpdated>(_onProductFiltersUpdated);
     on<ProductFiltersApplied>(_onProductFiltersApplied);
     on<ProductsNextPageRequested>(_onProductsNextPageRequested);
+    on<ProductFavoriteToggled>(_onProductFavoriteToggled);
+  }
+
+  Future<void> _onProductFavoriteToggled(
+    ProductFavoriteToggled event,
+    Emitter<ProductsState> emit,
+  ) async {
+    if (state is! ProductsLoaded) return;
+    final current = state as ProductsLoaded;
+    final index = current.products.indexWhere((p) => p.id == event.productId);
+    if (index < 0) return;
+
+    final product = current.products[index];
+    final newFavorite = !product.isFavorite;
+
+    final updatedProducts = [
+      ...current.products.sublist(0, index),
+      Product(
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        photo: product.photo,
+        isFavorite: newFavorite,
+      ),
+      ...current.products.sublist(index + 1),
+    ];
+    emit(current.copyWith(products: updatedProducts));
+
+    final result = newFavorite
+        ? await addToFavoritesUseCase(event.productId)
+        : await removeFromFavoritesUseCase(event.productId);
+
+    result.fold(
+      (_) {
+        emit(current.copyWith(products: current.products));
+      },
+      (_) {},
+    );
   }
 
   Future<void> _onProductCategoryChanged(

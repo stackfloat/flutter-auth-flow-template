@@ -57,7 +57,5 @@ const _menuItems = [
   'My Orders',
   'My Favourites',
   'Shipping Address',
-  'My Saved Cards',
-  'Gift Cards & Vouchers',
   'Logout',
 ];

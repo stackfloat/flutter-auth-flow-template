@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/add_to_favorites_use_case.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/remove_from_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/entities/product_details.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_product_details_use_case.dart';
 
@@ -8,11 +10,39 @@ part 'product_details_state.dart';
 
 class ProductDetailsBloc extends Bloc<ProductDetailsEvent, ProductDetailsState> {
   final GetProductDetailsUseCase getProductDetailsUseCase;
+  final AddToFavoritesUseCase addToFavoritesUseCase;
+  final RemoveFromFavoritesUseCase removeFromFavoritesUseCase;
 
-  ProductDetailsBloc(this.getProductDetailsUseCase)
-      : super(ProductDetailsInitial()) {
+  ProductDetailsBloc(
+    this.getProductDetailsUseCase,
+    this.addToFavoritesUseCase,
+    this.removeFromFavoritesUseCase,
+  ) : super(ProductDetailsInitial()) {
     on<GetProductDetailsEvent>(_onGetProductDetails);
     on<ProductDetailsQuantityChanged>(_onProductDetailsQuantityChanged);
+    on<ProductFavoriteToggled>(_onProductFavoriteToggled);
+  }
+
+  Future<void> _onProductFavoriteToggled(
+    ProductFavoriteToggled event,
+    Emitter<ProductDetailsState> emit,
+  ) async {
+    if (state is! ProductDetailsLoaded) return;
+    final current = state as ProductDetailsLoaded;
+    final newFavorite = !current.product.isFavorite;
+
+    emit(current.copyWith(
+      product: current.product.copyWith(isFavorite: newFavorite),
+    ));
+
+    final result = newFavorite
+        ? await addToFavoritesUseCase(current.product.id)
+        : await removeFromFavoritesUseCase(current.product.id);
+
+    result.fold(
+      (_) => emit(current.copyWith(product: current.product)),
+      (_) {},
+    );
   }
 
   Future<void> _onGetProductDetails(

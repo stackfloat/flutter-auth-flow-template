@@ -37,4 +37,12 @@ class ProductRepositoryImpl implements ProductRepository {
     final result = await productRemoteDataSource.getProductDetails(productId);
     return result.map((details) => details);
   }
+
+  @override
+  ResultFuture<void> addToFavorites(int productId) =>
+      productRemoteDataSource.addToFavorites(productId);
+
+  @override
+  ResultFuture<void> removeFromFavorites(int productId) =>
+      productRemoteDataSource.removeFromFavorites(productId);
 }

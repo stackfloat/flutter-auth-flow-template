@@ -24,3 +24,7 @@ final class ProductDetailsQuantityChanged extends ProductDetailsEvent {
   @override
   List<Object?> get props => [quantity];
 }
+
+final class ProductFavoriteToggled extends ProductDetailsEvent {
+  const ProductFavoriteToggled();
+}

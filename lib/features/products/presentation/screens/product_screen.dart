@@ -221,15 +221,32 @@ class _ProductHero extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              top: topInset + 8.h,
-              right: 10.w,
-              child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.favorite_rounded),
-                color: Colors.redAccent,
-                iconSize: 24.sp,
-              ),
+            BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
+              buildWhen: (prev, curr) =>
+                  prev is ProductDetailsLoaded &&
+                  curr is ProductDetailsLoaded &&
+                  prev.product.isFavorite != curr.product.isFavorite,
+              builder: (context, state) {
+                final isFavorite = state is ProductDetailsLoaded
+                    ? state.product.isFavorite
+                    : false;
+                return Positioned(
+                  top: topInset + 8.h,
+                  right: 10.w,
+                  child: IconButton(
+                    onPressed: () => context
+                        .read<ProductDetailsBloc>()
+                        .add(const ProductFavoriteToggled()),
+                    icon: Icon(
+                      isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                    ),
+                    color: isFavorite ? Colors.redAccent : Colors.white,
+                    iconSize: 24.sp,
+                  ),
+                );
+              },
             ),
           ],
         ),

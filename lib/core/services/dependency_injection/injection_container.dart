@@ -37,9 +37,11 @@ import 'package:furniture_ecommerce_app/features/home/presentation/bloc/home_blo
 import 'package:furniture_ecommerce_app/features/products/data/datasources/product_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/products/data/repositories/product_repository_impl.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/repositories/product_repository.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/add_to_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_categories_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_product_details_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/domain/use_cases/get_products_use_case.dart';
+import 'package:furniture_ecommerce_app/features/products/domain/use_cases/remove_from_favorites_use_case.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/categories_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
@@ -283,16 +285,30 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<GetProductDetailsUseCase>(
     () => GetProductDetailsUseCase(sl<ProductRepository>()),
   );
+  sl.registerLazySingleton<AddToFavoritesUseCase>(
+    () => AddToFavoritesUseCase(sl<ProductRepository>()),
+  );
+  sl.registerLazySingleton<RemoveFromFavoritesUseCase>(
+    () => RemoveFromFavoritesUseCase(sl<ProductRepository>()),
+  );
 
   // Blocs
   sl.registerFactory<ProductsBloc>(
-    () => ProductsBloc(sl<GetProductsUseCase>()),
+    () => ProductsBloc(
+      sl<GetProductsUseCase>(),
+      sl<AddToFavoritesUseCase>(),
+      sl<RemoveFromFavoritesUseCase>(),
+    ),
   );
   sl.registerFactory<CategoriesBloc>(
     () => CategoriesBloc(sl<GetCategoriesUseCase>()),
   );
   sl.registerFactory<ProductDetailsBloc>(
-    () => ProductDetailsBloc(sl<GetProductDetailsUseCase>()),
+    () => ProductDetailsBloc(
+      sl<GetProductDetailsUseCase>(),
+      sl<AddToFavoritesUseCase>(),
+      sl<RemoveFromFavoritesUseCase>(),
+    ),
   );
 
   // ---------------------------------------------------------------------------

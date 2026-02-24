@@ -8,4 +8,6 @@ abstract class ProductRepository {
   ResultFuture<ProductsPageData> getProducts(GetProductsParams params);
   ResultFuture<List<CategoryListItem>> getCategories();
   ResultFuture<ProductDetails> getProductDetails(int productId);
+  ResultFuture<void> addToFavorites(int productId);
+  ResultFuture<void> removeFromFavorites(int productId);
 }

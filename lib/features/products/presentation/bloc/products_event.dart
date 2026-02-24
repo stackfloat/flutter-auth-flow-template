@@ -84,3 +84,12 @@ final class ProductFiltersApplied extends ProductsEvent {
 final class ProductsNextPageRequested extends ProductsEvent {
   const ProductsNextPageRequested();
 }
+
+final class ProductFavoriteToggled extends ProductsEvent {
+  final int productId;
+
+  const ProductFavoriteToggled(this.productId);
+
+  @override
+  List<Object?> get props => [productId];
+}
