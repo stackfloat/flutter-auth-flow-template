@@ -157,10 +157,20 @@ class ChooseAddressScreen extends StatelessWidget {
                     final canContinue = state is ChooseAddressLoaded &&
                         state.addresses.isNotEmpty &&
                         state.selectedIndex != null;
+                    final selectedAddress = state is ChooseAddressLoaded
+                        ? state.selectedAddress
+                        : null;
                     return ElevatedButtonWidget(
                       buttonLabel: 'Continue',
                       enabled: canContinue,
-                      onPressEvent: () => context.pushNamed('payment-completed'),
+                      onPressEvent: () {
+                        if (selectedAddress != null) {
+                          context.pushNamed(
+                            'order-review',
+                            extra: selectedAddress,
+                          );
+                        }
+                      },
                     );
                   },
                 ),

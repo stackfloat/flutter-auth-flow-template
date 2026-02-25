@@ -14,7 +14,9 @@ import 'package:furniture_ecommerce_app/features/cart/presentation/screens/cart_
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/add_new_address_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/choose_address_bloc.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/entities/address.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/choose_address_screen.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/order_review_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/payment_completed_screen.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/screens/home_screen.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/bloc/home_bloc.dart';
@@ -148,6 +150,21 @@ GoRouter createRouter({
           create: (_) => sl<AddNewAddressBloc>(),
           child: const AddNewAddressScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/checkout/order-review',
+        name: 'order-review',
+        builder: (context, state) {
+          final address = state.extra is Address ? state.extra as Address : null;
+          if (address == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('No address selected. Please go back.'),
+              ),
+            );
+          }
+          return OrderReviewScreen(selectedAddress: address);
+        },
       ),
       GoRoute(
         path: '/checkout/payment-completed',
