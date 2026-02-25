@@ -15,6 +15,7 @@ import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/a
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/add_new_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/choose_address_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/entities/address.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/checkout_payment_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/choose_address_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/order_review_screen.dart';
 import 'package:furniture_ecommerce_app/features/checkout/presentation/screens/payment_completed_screen.dart';
@@ -163,13 +164,19 @@ GoRouter createRouter({
               ),
             );
           }
-          return OrderReviewScreen(selectedAddress: address);
+          return BlocProvider(
+            create: (_) => sl<CheckoutPaymentBloc>(),
+            child: OrderReviewScreen(selectedAddress: address),
+          );
         },
       ),
       GoRoute(
         path: '/checkout/payment-completed',
         name: 'payment-completed',
-        builder: (_, _) => const PaymentCompletedScreen(),
+        builder: (_, state) {
+          final orderNumber = state.extra is String ? state.extra as String : null;
+          return PaymentCompletedScreen(orderNumber: orderNumber);
+        },
       ),
       GoRoute(
         path: '/profile/edit',

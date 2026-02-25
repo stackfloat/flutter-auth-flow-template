@@ -7,6 +7,7 @@ import 'package:furniture_ecommerce_app/features/cart/domain/entities/cart_data.
 import 'package:furniture_ecommerce_app/features/cart/domain/entities/cart_item.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/entities/address.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/checkout_payment_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class OrderReviewScreen extends StatelessWidget {
@@ -31,12 +32,24 @@ class OrderReviewScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
-      body: BlocBuilder<CartBloc, CartState>(
-        builder: (context, state) {
-          final cartData = _resolveData(state);
-          final items = cartData.items;
+      body: BlocConsumer<CheckoutPaymentBloc, CheckoutPaymentState>(
+        listenWhen: (prev, curr) =>
+            prev.status != curr.status &&
+            curr.status == CheckoutPaymentStatus.success,
+        listener: (context, state) {
+          context.read<CartBloc>().add(const GetCartEvent());
+          context.pushReplacementNamed(
+            'payment-completed',
+            extra: state.order?.orderNumber,
+          );
+        },
+        builder: (context, paymentState) {
+          return BlocBuilder<CartBloc, CartState>(
+            builder: (context, cartState) {
+              final cartData = _resolveData(cartState);
+              final items = cartData.items;
 
-          if (items.isEmpty) {
+              if (items.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -92,6 +105,15 @@ class OrderReviewScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              if (paymentState.status == CheckoutPaymentStatus.failure)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 8.h),
+                  child: Text(
+                    paymentState.errorMessage ?? 'Payment failed',
+                    style: textTheme.bodyMedium?.copyWith(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               SafeArea(
                 top: false,
                 child: Padding(
@@ -100,14 +122,26 @@ class OrderReviewScreen extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButtonWidget(
                       buttonLabel: 'Pay Now',
+                      isLoading: paymentState.status ==
+                              CheckoutPaymentStatus.placingOrder ||
+                          paymentState.status ==
+                              CheckoutPaymentStatus.awaitingPayment ||
+                          paymentState.status ==
+                              CheckoutPaymentStatus.verifying,
                       onPressEvent: () {
-                        context.pushReplacementNamed('payment-completed');
+                        context.read<CheckoutPaymentBloc>().add(
+                              CheckoutPaymentRequested(
+                                addressId: selectedAddress.id,
+                              ),
+                            );
                       },
                     ),
                   ),
                 ),
               ),
             ],
+          );
+            },
           );
         },
       ),

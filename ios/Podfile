@@ -39,5 +39,26 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    if target.name == 'Pods-Runner'
+      target.build_configurations.each do |config|
+        config.build_settings['CONFIGURATION_BUILD_DIR'] = '$(PODS_CONFIGURATION_BUILD_DIR)'
+      end
+    end
+  end
+end
+
+post_integrate do |installer|
+  installer.aggregate_targets.each do |aggregate_target|
+    user_project = aggregate_target.user_project
+    next if user_project.nil?
+
+    user_project.files
+      .select { |file| ['Pods_Runner.framework', 'Pods_RunnerTests.framework'].include?(file.path) }
+      .each do |file|
+        file.referrers.grep(Xcodeproj::Project::Object::PBXBuildFile).each(&:remove_from_project)
+        file.remove_from_project
+      end
+
+    user_project.save
   end
 end

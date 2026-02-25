@@ -5,7 +5,9 @@ import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 class PaymentCompletedScreen extends StatelessWidget {
-  const PaymentCompletedScreen({super.key});
+  const PaymentCompletedScreen({super.key, this.orderNumber});
+
+  final String? orderNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +39,13 @@ class PaymentCompletedScreen extends StatelessWidget {
                       color: Colors.black87,
                       height: 1.45,
                     ),
-                    children: const [
-                      TextSpan(text: 'Your Order '),
+                    children: [
+                      const TextSpan(text: 'Your Order '),
                       TextSpan(
-                        text: '#345678',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        text: orderNumber ?? '—',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      TextSpan(text: ' is Completed.\n'),
+                      const TextSpan(text: ' is Completed.\n'),
                       TextSpan(text: 'Please Check the Delivery Status at '),
                       TextSpan(
                         text: 'Order Tracking',

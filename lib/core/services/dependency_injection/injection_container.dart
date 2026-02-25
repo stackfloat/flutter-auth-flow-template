@@ -23,8 +23,15 @@ import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/remove_ca
 import 'package:furniture_ecommerce_app/features/cart/domain/use_cases/update_cart_item_use_case.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/data/datasources/address_remote_data_source.dart';
+import 'package:furniture_ecommerce_app/features/checkout/data/datasources/order_remote_data_source.dart';
 import 'package:furniture_ecommerce_app/features/checkout/data/repositories/address_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/checkout/data/repositories/order_repository_impl.dart';
+import 'package:furniture_ecommerce_app/features/checkout/data/services/razorpay_payment_service.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/repositories/address_repository.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/repositories/order_repository.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/place_order_use_case.dart';
+import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/verify_payment_use_case.dart';
+import 'package:furniture_ecommerce_app/features/checkout/presentation/bloc/checkout_payment_bloc.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/create_address_use_case.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/get_address_use_case.dart';
 import 'package:furniture_ecommerce_app/features/checkout/domain/use_cases/get_addresses_use_case.dart';
@@ -246,6 +253,30 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<UpdateAddressUseCase>(
     () => UpdateAddressUseCase(sl<AddressRepository>()),
+  );
+
+  // Order
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+    () => OrderRemoteDataSourceImpl(sl<DioClient>()),
+  );
+  sl.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(sl<OrderRemoteDataSource>()),
+  );
+  sl.registerLazySingleton<PlaceOrderUseCase>(
+    () => PlaceOrderUseCase(sl<OrderRepository>()),
+  );
+  sl.registerLazySingleton<VerifyPaymentUseCase>(
+    () => VerifyPaymentUseCase(sl<OrderRepository>()),
+  );
+  sl.registerLazySingleton<RazorpayPaymentService>(
+    () => RazorpayPaymentService(),
+  );
+  sl.registerFactory<CheckoutPaymentBloc>(
+    () => CheckoutPaymentBloc(
+      sl<PlaceOrderUseCase>(),
+      sl<VerifyPaymentUseCase>(),
+      sl<RazorpayPaymentService>(),
+    ),
   );
 
   // ---------------------------------------------------------------------------
