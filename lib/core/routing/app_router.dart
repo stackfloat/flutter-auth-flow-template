@@ -25,6 +25,7 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_change_password_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_edit_profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_favorites_bloc.dart';
@@ -156,11 +157,19 @@ GoRouter createRouter({
       GoRoute(
         path: '/profile/edit',
         name: 'profile-edit',
-        builder: (_, _) => BlocProvider(
-          create: (_) =>
-              sl<ProfileEditProfileBloc>()..add(const ProfileEditProfileLoadRequested()),
-          child: const ProfileEditProfileScreen(),
-        ),
+        builder: (context, _) {
+          final profile = context.read<ProfileBloc>().state.profile;
+          final bloc = sl<ProfileEditProfileBloc>();
+          if (profile != null) {
+            bloc.add(ProfileEditProfileInitialDataReceived(profile: profile));
+          } else {
+            bloc.add(const ProfileEditProfileLoadRequested());
+          }
+          return BlocProvider.value(
+            value: bloc,
+            child: const ProfileEditProfileScreen(),
+          );
+        },
       ),
       GoRoute(
         path: '/profile/change-password',

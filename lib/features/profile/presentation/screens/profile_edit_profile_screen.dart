@@ -5,6 +5,8 @@ import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_widg
 import 'package:furniture_ecommerce_app/core/common/widgets/error_text_widget.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/labeled_input_field_widget.dart';
 import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/features/profile/domain/entities/profile.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_edit_profile_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -38,7 +40,18 @@ class ProfileEditProfileScreen extends StatelessWidget {
         listenWhen: (previous, current) =>
             previous.status != current.status &&
             current.status == ProfileEditProfileStatus.success,
-        listener: (context, state) => context.pop(),
+        listener: (context, state) {
+          context.read<ProfileBloc>().add(
+                ProfileUpdated(
+                  Profile(
+                    id: state.profileId!,
+                    name: state.name,
+                    email: state.email,
+                  ),
+                ),
+              );
+          context.pop();
+        },
         builder: (context, state) {
           if (state.status == ProfileEditProfileStatus.loading ||
               state.status == ProfileEditProfileStatus.initial) {

@@ -17,6 +17,7 @@ import 'package:furniture_ecommerce_app/features/authentication/domain/usecases/
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_bloc.dart';
 import 'package:furniture_ecommerce_app/features/authentication/presentation/bloc/auth/auth_state.dart';
 import 'package:furniture_ecommerce_app/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:furniture_ecommerce_app/firebase_options.dart';
 import 'package:go_router/go_router.dart';
 
@@ -92,6 +93,10 @@ void main() {
             ),
             BlocProvider(
               create: (_) => sl<CartBloc>()..add(const GetCartEvent()),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  sl<ProfileBloc>()..add(const ProfileLoadRequested()),
             ),
           ],
           child: MainApp(initialLocation: initialLocation),

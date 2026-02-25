@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furniture_ecommerce_app/core/errors/failure.dart';
+import 'package:furniture_ecommerce_app/features/profile/domain/entities/profile.dart';
 import 'package:furniture_ecommerce_app/features/profile/domain/use_cases/get_profile_use_case.dart';
 import 'package:furniture_ecommerce_app/features/profile/domain/use_cases/update_profile_params.dart';
 import 'package:furniture_ecommerce_app/features/profile/domain/use_cases/update_profile_use_case.dart';
@@ -18,8 +19,24 @@ class ProfileEditProfileBloc
     this.updateProfileUseCase,
   ) : super(const ProfileEditProfileState()) {
     on<ProfileEditProfileLoadRequested>(_onLoadRequested);
+    on<ProfileEditProfileInitialDataReceived>(_onInitialDataReceived);
     on<ProfileEditProfileFieldChanged>(_onFieldChanged);
     on<ProfileEditProfileSaveRequested>(_onSaveRequested);
+  }
+
+  void _onInitialDataReceived(
+    ProfileEditProfileInitialDataReceived event,
+    Emitter<ProfileEditProfileState> emit,
+  ) {
+    emit(state.copyWith(
+      status: ProfileEditProfileStatus.ready,
+      profileId: event.profile.id,
+      name: event.profile.name,
+      email: event.profile.email,
+      errors: ProfileEditProfileErrors.empty,
+      formSubmitted: false,
+      serverError: null,
+    ));
   }
 
   Future<void> _onLoadRequested(

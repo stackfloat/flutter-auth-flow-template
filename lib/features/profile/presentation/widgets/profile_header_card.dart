@@ -4,7 +4,14 @@ import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
 
 class ProfileHeaderCard extends StatelessWidget {
-  const ProfileHeaderCard({super.key});
+  const ProfileHeaderCard({
+    super.key,
+    required this.name,
+    required this.email,
+  });
+
+  final String name;
+  final String email;
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +33,17 @@ class ProfileHeaderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.r),
-            child: Container(
-              width: 64.w,
-              height: 64.w,
-              color: Colors.black,
+          Container(
+            width: 64.w,
+            height: 64.w,
+            decoration: BoxDecoration(
+              color: AppColors.border.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(
+              Icons.person_rounded,
+              size: 36.sp,
+              color: AppColors.lightTextSecondary,
             ),
           ),
           SizedBox(width: 14.w),
@@ -40,7 +52,7 @@ class ProfileHeaderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'William B. Brickner',
+                  name.isNotEmpty ? name : '—',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.typography.pageTitleMedium.copyWith(
@@ -50,7 +62,7 @@ class ProfileHeaderCard extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  'william.Brickner56@gmail.com',
+                  email.isNotEmpty ? email : '—',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.typography.bodySmall.copyWith(

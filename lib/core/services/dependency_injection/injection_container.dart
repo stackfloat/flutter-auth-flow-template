@@ -50,6 +50,7 @@ import 'package:furniture_ecommerce_app/features/products/presentation/bloc/cate
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/product_details_bloc.dart';
 import 'package:furniture_ecommerce_app/features/products/presentation/bloc/products_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_addresses_bloc.dart';
+import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_edit_profile_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/presentation/bloc/profile_favorites_bloc.dart';
 import 'package:furniture_ecommerce_app/features/profile/data/datasources/profile_remote_data_source.dart';
@@ -273,6 +274,9 @@ Future<void> initDependencies() async {
   );
 
   // Blocs
+  sl.registerFactory<ProfileBloc>(
+    () => ProfileBloc(sl<GetProfileUseCase>()),
+  );
   sl.registerFactory<ProfileEditProfileBloc>(
     () => ProfileEditProfileBloc(
       sl<GetProfileUseCase>(),
