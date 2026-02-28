@@ -1,8 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
 import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
+import 'package:furniture_ecommerce_app/features/home/domain/entities/home_banner.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/bloc/home_bloc.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/widgets/category_card.dart';
 import 'package:furniture_ecommerce_app/features/home/presentation/widgets/header_basket_icon.dart';
@@ -45,6 +48,7 @@ class HomeScreen extends StatelessWidget {
           final loadedState = state as HomeLoaded;
           final categories = loadedState.data.categories;
           final products = loadedState.data.products;
+          final banner = loadedState.data.banner;
 
           return SingleChildScrollView(
             child: Center(
@@ -63,13 +67,9 @@ class HomeScreen extends StatelessWidget {
                           const HeaderBasketIcon(),
                         ],
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16.r),
-                        child: Image.asset(
-                          'assets/images/home_banner.png',
-                          width: double.infinity,
-                          fit: BoxFit.fitWidth,
-                        ),
+                      _HomeBannerCard(
+                        banner: banner,
+                        onTap: () => context.pushNamed('products'),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,6 +150,87 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _HomeBannerCard extends StatelessWidget {
+  const _HomeBannerCard({
+    required this.banner,
+    required this.onTap,
+  });
+
+  final HomeBanner? banner;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: SizedBox(
+          width: double.infinity,
+          height: 160.h,
+          child: banner != null && banner!.imageUrl.isNotEmpty
+              ? Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: banner!.imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, _) => Container(
+                        color: AppColors.border.withValues(alpha: 0.3),
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      errorWidget: (_, _, _) => Container(
+                        color: AppColors.border.withValues(alpha: 0.3),
+                        child: const Icon(Icons.image_not_supported_outlined),
+                      ),
+                    ),
+                    Positioned(
+                      left: 16.w,
+                      top: 16.h,
+                      right: 16.w,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (banner!.title.isNotEmpty)
+                            Text(
+                              banner!.title,
+                              style: context.typography.pageTitleMedium.copyWith(
+                                color: Colors.black,
+                              ),
+                            ),
+                          if (banner!.subTitle.isNotEmpty) ...[
+                            SizedBox(height: 4.h),
+                            Text(
+                              banner!.subTitle,
+                              style: context.typography.body.copyWith(
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : Container(
+                  color: AppColors.border.withValues(alpha: 0.3),
+                  child: Center(
+                    child: Text(
+                      'View Products',
+                      style: context.typography.body.copyWith(
+                        color: AppColors.lightTextSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+        ),
       ),
     );
   }
