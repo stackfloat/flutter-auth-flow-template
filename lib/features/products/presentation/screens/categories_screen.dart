@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -75,10 +76,7 @@ class _CategoryTile extends StatelessWidget {
   final CategoryListItem category;
   final VoidCallback onTap;
 
-  const _CategoryTile({
-    required this.category,
-    required this.onTap,
-  });
+  const _CategoryTile({required this.category, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -99,12 +97,22 @@ class _CategoryTile extends StatelessWidget {
                 child: Container(
                   width: 58.w,
                   height: 58.w,
-                  color: AppColors.border.withValues(alpha: 0.35),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.chair_alt_rounded,
-                    size: 28.sp,
-                    color: Colors.black87,
+                  color: AppColors.surface,
+                  child: CachedNetworkImage(
+                    imageUrl: category.icon,
+                    fit: BoxFit.cover,
+                    placeholder: (_, _) => const Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                    errorWidget: (_, _, _) => Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 22.sp,
+                      color: AppColors.lightTextSecondary,
+                    ),
                   ),
                 ),
               ),

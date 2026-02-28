@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:furniture_ecommerce_app/core/common/widgets/elevated_button_small_widget.dart';
+import 'package:furniture_ecommerce_app/core/theme/app_colors.dart';
+import 'package:furniture_ecommerce_app/core/theme/theme_extensions.dart';
 
 class ProductCard extends StatelessWidget {
   final String title;
@@ -18,31 +21,41 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      color: const Color(0xFFD9DDE1), // light gray background
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left image
           ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Image(
-              image: image,
-              width: 78,
-              height: 92,
-              fit: BoxFit.cover,
+            borderRadius: BorderRadius.circular(10.r),
+            child: Container(
+              color: AppColors.surface,
+              child: Image(
+                image: image,
+                width: 84.w,
+                height: 96.h,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          const SizedBox(width: 14),
-
-          // Right side: two columns split equally
+          SizedBox(width: 14.w),
           Expanded(
             child: SizedBox(
-              height: 92,
+              height: 96.h,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // First column: title (center vertically, left aligned)
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -50,36 +63,39 @@ class ProductCard extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                        style: context.typography.cardTitle.copyWith(
+                          height: 1.2,
                         ),
                       ),
                     ),
                   ),
-                  // Second column: price + button (center vertically, left aligned)
                   Expanded(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: Text(
-                            '\$${price.toStringAsFixed(2)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Price', style: context.typography.caption),
+                              SizedBox(height: 2.h),
+                              Text(
+                                '\$${price.toStringAsFixed(2)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.typography.body.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8.w),
                         ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 120),
+                          constraints: BoxConstraints(maxWidth: 120.w),
                           child: ElevatedButtonSmallWidget(
-                            buttonLabel: 'SHOP',
+                            buttonLabel: 'Buy',
                             onPressEvent: onShopTap ?? () {},
                           ),
                         ),

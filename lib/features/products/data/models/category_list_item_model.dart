@@ -4,6 +4,7 @@ class CategoryListItemModel extends CategoryListItem {
   const CategoryListItemModel({
     required super.id,
     required super.name,
+    super.icon,
     required super.productsCount,
   });
 
@@ -21,11 +22,13 @@ class CategoryListItemModel extends CategoryListItem {
     }
 
     final name = json['name'] is String ? json['name'] as String : '';
+    final icon = json['icon'] is String ? json['icon'] as String : '';
     final productsCount = parseInt(json['products_count']);
 
     return CategoryListItemModel(
       id: id,
       name: name,
+      icon: icon,
       productsCount: productsCount,
     );
   }

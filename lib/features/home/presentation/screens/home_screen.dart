@@ -16,15 +16,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const categoryIcons = <IconData>[
-      Icons.bed_rounded,
-      Icons.table_restaurant_rounded,
-      Icons.child_care_rounded,
-      Icons.weekend_rounded,
-      Icons.work_outline_rounded,
-      Icons.deck_rounded,
-    ];
-
     return Scaffold(
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
@@ -53,24 +44,42 @@ class HomeScreen extends StatelessWidget {
           return SingleChildScrollView(
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 0,
+                ),
                 child: SafeArea(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 12.h,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Discover', style: context.typography.pageTitle),
+                          Row(
+                            children: [
+                              Image.asset(
+                                'assets/images/logo.png',
+                                width: 28.w,
+                                height: 28.w,
+                                fit: BoxFit.contain,
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Smart Furniture Mart',
+                                style: context.typography.pageTitle,
+                              ),
+                            ],
+                          ),
                           const HeaderBasketIcon(),
                         ],
                       ),
+                      SizedBox(height: 18.h),
                       _HomeBannerCard(
                         banner: banner,
                         onTap: () => context.pushNamed('products'),
                       ),
+                      SizedBox(height: 22.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -80,25 +89,56 @@ class HomeScreen extends StatelessWidget {
                           ),
                           GestureDetector(
                             onTap: () => context.pushNamed('categories'),
-                            child: Text(
-                              'VIEW ALL',
-                              style: context.typography.pageTitleSmall,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 6.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999.r),
+                                border: Border.all(
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'View all',
+                                    style: context.typography.pageTitleSmall
+                                        .copyWith(
+                                          color: AppColors.lightTextSecondary,
+                                        ),
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 14.sp,
+                                    color: AppColors.lightTextSecondary,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
+                      SizedBox(height: 14.h),
                       SizedBox(
                         width: double.infinity,
-                        height: 190.h,
+                        height: 94.h,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: categories.length,
-                          separatorBuilder: (context, index) => SizedBox(width: 12.w),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(width: 12.w),
                           itemBuilder: (context, index) {
                             final category = categories[index];
                             return CategoryCard(
-                              icon: categoryIcons[index % categoryIcons.length],
+                              imageUrl: category.icon,
                               title: category.name,
+                              productsCount: category.productsCount,
                               onTap: () => context.pushNamed(
                                 'products-preview',
                                 queryParameters: {
@@ -109,27 +149,58 @@ class HomeScreen extends StatelessWidget {
                           },
                         ),
                       ),
+                      SizedBox(height: 24.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Trending',
+                            'Latest',
                             style: context.typography.pageTitleMedium,
                           ),
                           GestureDetector(
                             onTap: () => context.goNamed('products'),
-                            child: Text(
-                              'VIEW ALL',
-                              style: context.typography.pageTitleSmall,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 6.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999.r),
+                                border: Border.all(
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'View all',
+                                    style: context.typography.pageTitleSmall
+                                        .copyWith(
+                                          color: AppColors.lightTextSecondary,
+                                        ),
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 14.sp,
+                                    color: AppColors.lightTextSecondary,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
+                      SizedBox(height: 14.h),
                       ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: products.length > 5 ? 5 : products.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 16.h),
                         itemBuilder: (context, index) {
                           final product = products[index];
                           return ProductCard(
@@ -143,6 +214,7 @@ class HomeScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      SizedBox(height: 18.h),
                     ],
                   ),
                 ),
@@ -156,10 +228,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeBannerCard extends StatelessWidget {
-  const _HomeBannerCard({
-    required this.banner,
-    required this.onTap,
-  });
+  const _HomeBannerCard({required this.banner, required this.onTap});
 
   final HomeBanner? banner;
   final VoidCallback onTap;
@@ -182,9 +251,7 @@ class _HomeBannerCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       placeholder: (_, _) => Container(
                         color: AppColors.border.withValues(alpha: 0.3),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                       errorWidget: (_, _, _) => Container(
                         color: AppColors.border.withValues(alpha: 0.3),
@@ -201,9 +268,8 @@ class _HomeBannerCard extends StatelessWidget {
                           if (banner!.title.isNotEmpty)
                             Text(
                               banner!.title,
-                              style: context.typography.pageTitleMedium.copyWith(
-                                color: Colors.black,
-                              ),
+                              style: context.typography.pageTitleMedium
+                                  .copyWith(color: Colors.black),
                             ),
                           if (banner!.subTitle.isNotEmpty) ...[
                             SizedBox(height: 4.h),
